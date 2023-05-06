@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">TEST02</string>
     <string name="token">Token:</string>
+    <string name="weight_label" />
+    <string name="height_label" />
+    <string name="age_label" />
+    <string name="gender_label" />
 </resources>

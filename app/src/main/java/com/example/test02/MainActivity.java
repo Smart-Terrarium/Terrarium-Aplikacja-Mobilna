@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,8 +24,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity implements View.OnClickListener  {
+    private Button bmiChart;
     private static final String TAG = "MainActivity";
 
     private EditText mEmailEditText;
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient mHttpClient;
     private TextView mTokenTextView;
     private TextView mEmailTextView;
+    private Button heatChart;
+
 
 
     @SuppressLint("MissingInflatedId")
@@ -50,11 +53,13 @@ public class MainActivity extends AppCompatActivity {
         mRegisterButton = findViewById(R.id.registerButton);
         mTokenTextView = findViewById(R.id.tokenTextView);
         mEmailTextView = findViewById(R.id.emailTextView);
+        heatChart = findViewById(R.id.button_chart);
+
+        heatChart.setOnClickListener((View.OnClickListener) this);
 
         mAuthToken = getIntent().getStringExtra("auth_token");
         mTokenTextView.setText(mAuthToken);
 
-        // odczytaj email z SharedPreferences i wyświetl go w TextView
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", "");
         mEmailTextView.setText(email);
@@ -95,7 +100,16 @@ public class MainActivity extends AppCompatActivity {
             }
             new RegisterTask().execute(json);
         });
+
     }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_chart:
+                startActivity(new Intent(this, ChartActivity.class));
+                break;
+        }}
+
 
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
 
@@ -139,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
-                // zapisz email do SharedPreferences
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
@@ -205,13 +218,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+
+
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
                 Toast.makeText(MainActivity.this, "Zarejestrowano! Zaloguj sie!", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
-                // zapisz email do SharedPreferences
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
@@ -221,6 +235,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
             }
+
         }
+
     }
 }
