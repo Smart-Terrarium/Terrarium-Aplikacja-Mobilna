@@ -16,8 +16,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 import java.util.Iterator;
 import androidx.appcompat.app.AppCompatActivity;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.net.URI;
