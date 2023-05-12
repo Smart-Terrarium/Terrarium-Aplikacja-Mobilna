@@ -2,7 +2,6 @@ package com.example.test02;
 import org.json.*;
 
 import android.os.Bundle;
-import org.json.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,11 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
-import org.json.JSONObject;
-import org.json.JSONException;
-import java.util.Iterator;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
@@ -22,14 +17,34 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import tech.gusavila92.websocketclient.WebSocketClient;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
+import com.github.mikephil.charting.components.YAxis;
+
+
+
 
 public class ChartActivity extends AppCompatActivity {
     private WebSocketClient webSocketClient;
+    private LineChart lineChart;
+    private LineDataSet lineDataSet;
+    private LineData lineData;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
+        lineChart = findViewById(R.id.lineChart);
+
         createWebSocketClient();
     }
 
@@ -64,55 +79,72 @@ public class ChartActivity extends AppCompatActivity {
             @Override
             public void onTextReceived(String s) {
                 Log.i("WebSocket", "Message received");
-
+                List<Device> devices = new ArrayList<>();
                 try {
-                    //JSONParser parser = new JSONParser();
-                    //JSONObject json = (JSONObject) parser.parse(s);
-                    //s ="\"{\\\"2\\\": {\\\"6\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:51.372609\\\", \\\"value\\\": 28.86612323908645}, \\\"8\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:50.625622\\\", \\\"value\\\": 27.430420626059316}, \\\"1\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:49.721906\\\", \\\"value\\\": 23.582264565233757}, \\\"4\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:49.471529\\\", \\\"value\\\": 35.54956294645577}, \\\"2\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:44.497297\\\", \\\"value\\\": 31.366992588593433}, \\\"3\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:41.965832\\\", \\\"value\\\": 25.258133385518228}, \\\"7\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:39.090196\\\", \\\"value\\\": 33.893140790081596}, \\\"5\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:37.400957\\\", \\\"value\\\": 18.52029738334786}}, \\\"1\\\": {\\\"8\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:50.985998\\\", \\\"value\\\": 23.88428747172619}, \\\"5\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:50.182918\\\", \\\"value\\\": 33.1512214258401}, \\\"4\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:49.608302\\\", \\\"value\\\": 21.611447327119954}, \\\"2\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:49.250255\\\", \\\"value\\\": 35.65451501501501}, \\\"1\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:48.806911\\\", \\\"value\\\": 35.23710028458882}, \\\"6\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:47.485838\\\", \\\"value\\\": 18.19029173489022}, \\\"7\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:46.313356\\\", \\\"value\\\": 23.983209424753603}, \\\"3\\\": {\\\"timestamp\\\": \\\"2023-05-06T13:07:37.003867\\\", \\\"value\\\": 24.09385948068696}}}\"";
-                    JSONObject jsonObject = new JSONObject(convertStandardJSONString(s));
-
-
-
-
-                    JSONObject object2 = jsonObject.getJSONObject("2");
-                    double value2_6 = object2.getJSONObject("6").getDouble("value");
-                    String timestamp2_6 = object2.getJSONObject("6").getString("timestamp");
-                    System.out.println("VVVVVVVVVV" + value2_6);
-                    System.out.println("XXXXXXX" + timestamp2_6);
-                    ;
-                   // Log.d("content: ",s);
-                    StringBuilder sb = new StringBuilder();
-                    Iterator<String> keys = jsonObject.keys();
+                    JSONObject json = new JSONObject(convertStandardJSONString(s));
+                    Iterator<String> keys = json.keys();
                     while (keys.hasNext()) {
-                        String key = keys.next();
-                        JSONObject innerJsonObject = jsonObject.getJSONObject(key);
-                        Iterator<String> innerKeys = innerJsonObject.keys();
-                        while (innerKeys.hasNext()) {
-                            String innerKey = innerKeys.next();
-                            JSONObject innermostJsonObject = innerJsonObject.getJSONObject(innerKey);
-                            String timestamp = innermostJsonObject.getString("timestamp");
-                            double value = innermostJsonObject.getDouble("value");
-                            sb.append("key1: ").append(key)
-                                    .append(", key2: ").append(innerKey)
-                                    .append(", timestamp: ").append(timestamp)
-                                    .append(", value: ").append(value)
-                                    .append("\n");
-                          }
+                        String id = keys.next();
+                        JSONObject deviceObject = json.getJSONObject(id);
+                        Device device = new Device(id);
+                        Iterator<String> sensorKeys = deviceObject.keys();
+                        while (sensorKeys.hasNext()) {
+                            String sensorId = sensorKeys.next();
+                            JSONObject sensorObject = deviceObject.getJSONObject(sensorId);
+                            Sensor sensor = new Sensor(sensorId, sensorObject.getString("timestamp"), sensorObject.getDouble("value"));
+                            device.getSensors().add(sensor);
+                        }
+                        devices.add(device);
                     }
-                    TextView textView = findViewById(R.id.chart);
-                      textView.setText(sb.toString());
-                      }
-                catch (JSONException e) {
-                    System.out.println(e.toString());
-                    e.printStackTrace();
+                    for (Device device : devices) {
+                        System.out.println("Device ID: " + device.getId());
+                        List<Sensor> sensors = device.getSensors();
+                        for (Sensor sensor : sensors) {
+                            System.out.println("Sensor ID: " + sensor.getId());
+                            System.out.println("Timestamp: " + sensor.getTimestamp());
+                            System.out.println("Value: " + sensor.getValue());
+                            if (device.getId().equals("1") && sensor.getId().equals("8")) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        addEntryToChart(sensor.getValue());
+                                    }
+                                });}}
+                    }
+
+                } catch (JSONException e) {
+                    Log.e("WebSocket", "Error parsing JSON", e);
+                }
+            }
+            private void addEntryToChart(double value) {
+                if (lineDataSet == null) {
+                    lineDataSet = new LineDataSet(null, "Sensor 8");
+                    lineDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+                    lineDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+                    lineDataSet.setCircleColors(ColorTemplate.MATERIAL_COLORS);
+                    lineDataSet.setLineWidth(2f);
+                    lineDataSet.setCircleRadius(4f);
+                    lineDataSet.setFillAlpha(65);
+                    lineDataSet.setFillColor(ColorTemplate.MATERIAL_COLORS[0]);
+                    lineDataSet.setHighLightColor(Color.rgb(244, 117, 117));
+                    lineDataSet.setValueTextColor(Color.BLACK);
+                    lineDataSet.setValueTextSize(9f);
+
+                    lineData = new LineData(lineDataSet);
+                    lineChart.setData(lineData);
                 }
 
-
+                lineData.addEntry(new Entry(lineDataSet.getEntryCount(), (float) value), 0);
+                lineData.notifyDataChanged();
+                lineChart.notifyDataSetChanged();
+                lineChart.setVisibleXRangeMaximum(10);
+                lineChart.moveViewToX(lineData.getEntryCount());
             }
             class Sensor {
                 private String id;
                 private String timestamp;
                 private double value;
+
                 public Sensor(String id, String timestamp, double value) {
                     this.id = id;
                     this.timestamp = timestamp;
@@ -129,18 +161,16 @@ public class ChartActivity extends AppCompatActivity {
 
                 public double getValue() {
                     return value;
-                }}
+                }
+            }
+
             class Device {
                 private String id;
                 private List<Sensor> sensors;
 
                 public Device(String id) {
                     this.id = id;
-                    sensors = new ArrayList<>();
-                }
-
-                public void addSensor(Sensor sensor) {
-                    sensors.add(sensor);
+                    this.sensors = new ArrayList<>();
                 }
 
                 public String getId() {
@@ -150,10 +180,9 @@ public class ChartActivity extends AppCompatActivity {
                 public List<Sensor> getSensors() {
                     return sensors;
                 }
-
             }
 
-                @Override
+            @Override
             public void onBinaryReceived(byte[] data) {}
 
             @Override
