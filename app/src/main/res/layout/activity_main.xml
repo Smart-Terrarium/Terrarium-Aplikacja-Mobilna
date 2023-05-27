@@ -6,8 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="#2100BCD4">
+    android:background="#676767">
 
+    <ImageView
+        android:id="@+id/backgroundImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:alpha="0.4" />
 
     <TextView
         android:id="@+id/tokenTextView"
@@ -32,54 +44,83 @@
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="35dp"
         android:autofillHints=""
-        android:minHeight="48dp"
-        app:layout_constraintTop_toBottomOf="@id/emailTextView"
-        app:layout_constraintStart_toStartOf="parent"
+        android:hint="Adres email"
+        android:minHeight="38dp"
+        android:padding="8dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#EBFFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
-        android:hint="Adres email"/>
-
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/emailTextView" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/emailEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:autofillHints=""
-        android:minHeight="48dp"
+        android:minHeight="38dp"
         app:layout_constraintTop_toBottomOf="@id/emailEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:hint="Hasło"/>
-    <Button
-        android:id="@+id/loginButton"
+        android:hint="Hasło"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#EBFFFFFF"
+        android:padding="8dp"
+        android:inputType="textPassword" />
+    <View
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Zaloguj"
+        android:layout_height="2dp"
+        android:background="#E6FFFFFF"
         app:layout_constraintTop_toBottomOf="@id/passwordEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/registerButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        tools:ignore="MissingConstraints"
-        app:layout_constraintTop_toBottomOf="@id/loginButton"
-        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/loginButton"
+        style="@style/ButtonStyle"
+        android:layout_width="375dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="50dp"
+        android:backgroundTint="#E6FFFFFF"
+        android:text="Zaloguj"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="Zarejestruj"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
 
     <Button
-        android:id="@+id/button_chart"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Wykres"
-        app:layout_constraintTop_toBottomOf="@id/registerButton"
+        android:id="@+id/registerButton"
+        style="@style/ButtonStyle"
+        android:layout_width="375dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="16dp"
+        android:text="Zarejestruj"
+        android:backgroundTint="#E6FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/loginButton" />
+
+    <Button
+        android:id="@+id/forgotPasswordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Zapomniałem hasła"
+        android:background="@android:color/transparent"
+        android:textColor="#E6FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/registerButton" />
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

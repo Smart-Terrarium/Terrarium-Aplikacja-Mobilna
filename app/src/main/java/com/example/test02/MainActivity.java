@@ -24,8 +24,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener  {
-    private Button bmiChart;
+public class MainActivity extends AppCompatActivity  {
     private static final String TAG = "MainActivity";
 
     private EditText mEmailEditText;
@@ -36,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private OkHttpClient mHttpClient;
     private TextView mTokenTextView;
     private TextView mEmailTextView;
-    private Button heatChart;
+
 
 
 
@@ -53,9 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRegisterButton = findViewById(R.id.registerButton);
         mTokenTextView = findViewById(R.id.tokenTextView);
         mEmailTextView = findViewById(R.id.emailTextView);
-        heatChart = findViewById(R.id.button_chart);
 
-        heatChart.setOnClickListener((View.OnClickListener) this);
 
         mAuthToken = getIntent().getStringExtra("auth_token");
         mTokenTextView.setText(mAuthToken);
@@ -102,13 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
     }
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button_chart:
-                startActivity(new Intent(this, ChartActivity.class));
-                break;
-        }}
+
 
 
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
