@@ -23,6 +23,6 @@ public class SplashActivity extends AppCompatActivity {
                 // Zamknij obecną aktywność
                 finish();
             }
-        }, 3000000);
+        }, 400);
     }
 }

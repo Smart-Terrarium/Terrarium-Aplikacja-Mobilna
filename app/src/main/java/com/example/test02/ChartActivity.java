@@ -1,61 +1,108 @@
 package com.example.test02;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import android.util.Log;
+import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import tech.gusavila92.websocketclient.WebSocketClient;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
-import android.graphics.Color;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.Legend;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 
-import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.formatter.ValueFormatter;
-import android.os.Handler;
-import android.os.Looper;
+import java.util.Iterator;
+import java.util.List;
 
-public class ChartActivity extends MainActivity   {
+
+import tech.gusavila92.websocketclient.WebSocketClient;
+
+public class ChartActivity extends AppCompatActivity {
     private WebSocketClient webSocketClient;
     private LineChart lineChart;
     private LineDataSet lineDataSet;
     private LineData lineData;
-    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-    SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+    private SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private List<String> formattedTimestamps = new ArrayList<>();
     private String mAuthToken;
+    private String selectedDeviceId = "macasdasas";
+    private String selectedSensorId = "2";
+    private Spinner deviceSpinner;
+    private Spinner sensorSpinner;
+    private List<Device> devices = new ArrayList<>();
 
 
+    class Sensor {
+        private final String id;
+        private final String timestamp;
+        private final double value;
+        private String formattedTimestamp;
 
+        public Sensor(String id, String timestamp, double value) {
+            this.id = id;
+            this.timestamp = timestamp;
+            this.value = value;
+            this.formattedTimestamp = "";
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+
+        public double getValue() {
+            return value;
+        }
+    }
+
+    class Device {
+        private final String id;
+        private final List<Sensor> sensors;
+
+        public Device(String id) {
+            this.id = id;
+            this.sensors = new ArrayList<>();
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public List<Sensor> getSensors() {
+            return sensors;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
         lineChart = findViewById(R.id.lineChart);
+        deviceSpinner = findViewById(R.id.deviceSpinner);
+        sensorSpinner = findViewById(R.id.sensorSpinner);
         mAuthToken = getIntent().getStringExtra("auth_token");
         System.out.println("Token: " + mAuthToken);
-
 
         createWebSocketClient();
     }
@@ -63,84 +110,43 @@ public class ChartActivity extends MainActivity   {
     private void createWebSocketClient() {
         URI uri;
         try {
-            uri = new URI("ws://192.168.88.252:8000/device/sensor/data");
+            uri = new URI("ws://192.168.88.252:8000/device/1/sensor/data");
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;
         }
-        class Sensor {
-            private final String id;
-            private final String timestamp;
-            private final double value;
-            private String formattedTimestamp;
-
-            public Sensor(String id, String timestamp, double value) {
-                this.id = id;
-                this.timestamp = timestamp;
-                this.value = value;
-                this.formattedTimestamp = "";
-            }
-
-            public String getId() {
-                return id;
-            }
-
-            public String getTimestamp() {
-                return timestamp;
-            }
-
-            public double getValue() {
-                return value;
-            }
-
-
-        }
-
-        class Device {
-            private final String id;
-            private final List<Sensor> sensors;
-
-            public Device(String id) {
-                this.id = id;
-                this.sensors = new ArrayList<>();
-            }
-
-            public String getId() {
-                return id;
-            }
-
-            public List<Sensor> getSensors() {
-                return sensors;
-            }
-        }
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("token", mAuthToken);
 
         webSocketClient = new WebSocketClient(uri) {
             @Override
             public void onOpen() {
                 Log.i("WebSocket", "Rozpoczęto sesję");
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("token", mAuthToken);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                webSocketClient.send(json.toString());  // Wysłanie wiadomości w formacie JSON
                 webSocketClient.send("Hello World!");
+
             }
-
-
 
             @Override
             public void onTextReceived(String s) {
                 Log.i("WebSocket", "Odebrano wiadomość");
-                List<Device> devices = new ArrayList<>();
+
 
                 try {
                     // Parsowanie otrzymanego ciągu JSON
-                    JSONObject json = new JSONObject((s));
+                    JSONObject json = new JSONObject(s);
                     Iterator<String> keys = json.keys();
                     while (keys.hasNext()) {
                         String id = keys.next();
                         JSONObject deviceObject = json.getJSONObject(id);
 
                         // Tworzenie obiektu urządzenia
-                        Device device = new Device(id);           // Iteracja po czujnikach w danym urządzeniu
+                        Device device = new Device(id);
+                        // Iteracja po czujnikach w danym urządzeniu
                         Iterator<String> sensorKeys = deviceObject.keys();
                         while (sensorKeys.hasNext()) {
                             String sensorId = sensorKeys.next();
@@ -169,7 +175,7 @@ public class ChartActivity extends MainActivity   {
                                 String formattedTimestamp = outputFormat.format(timestamp);
                                 System.out.println("Przetworzony timestamp: " + formattedTimestamp);
 
-                                if (device.getId().equals("1") && sensor.getId().equals("8")) {
+                                if (device.getId().equals(selectedDeviceId) && sensor.getId().equals(selectedSensorId)) {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -183,19 +189,15 @@ public class ChartActivity extends MainActivity   {
                             }
                         }
                     }
-
-
+                    System.out.println(devices.toString());
                 } catch (JSONException e) {
                     Log.e("WebSocket", "Błąd podczas parsowania JSON", e);
                 }
             }
-
-
-
             // Metoda do dodawania wpisu do wykresu
             private void addEntryToChart(double value, String timestamp) {
                 if (lineDataSet == null) {
-                    lineDataSet = new LineDataSet(null, "Czujnik 8");
+                    lineDataSet = new LineDataSet(null, "Czujnik " + selectedSensorId);
                     lineDataSet.setValueTextSize(20f);
                     lineDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
                     lineDataSet.setColor(Color.parseColor("#2196F3"));  // Ustawienie koloru linii
@@ -208,7 +210,6 @@ public class ChartActivity extends MainActivity   {
                     lineDataSet.setHighLightColor(Color.rgb(244, 117, 117));
                     lineDataSet.setValueTextColor(Color.BLUE);
                     lineDataSet.setValueTextSize(20f);
-
 
                     YAxis leftAxis = lineChart.getAxisLeft();
                     leftAxis.setTextSize(15f);  // Zmiana rozmiaru czcionki dla etykiet osi Y
@@ -239,13 +240,11 @@ public class ChartActivity extends MainActivity   {
                     lineChart.setBorderColor(Color.BLACK);
                     lineChart.setBorderWidth(5f);
 
-
                     lineChart.setBackgroundColor(Color.DKGRAY);
 
                     lineChart.getXAxis().setTextColor(Color.WHITE);
                     lineChart.getAxisLeft().setTextColor(Color.WHITE);
                     lineChart.getAxisRight().setTextColor(Color.WHITE);
-
 
                     lineChart.getXAxis().setAxisLineWidth(2f);
                     lineChart.getAxisLeft().setAxisLineWidth(2f);
@@ -254,13 +253,9 @@ public class ChartActivity extends MainActivity   {
                     lineChart.getXAxis().setGridLineWidth(2f);
                     lineChart.getAxisLeft().setGridLineWidth(2f);
                     lineChart.getAxisRight().setGridLineWidth(2f);
+
                     lineChart.moveViewToX(lineData.getEntryCount());
-
                     lineChart.getXAxis().setLabelRotationAngle(-45f);
-
-
-
-
                 }
 
                 lineData.addEntry(new Entry(lineDataSet.getEntryCount(), (float) value), 0);
@@ -268,8 +263,9 @@ public class ChartActivity extends MainActivity   {
                 lineChart.notifyDataSetChanged();
                 lineChart.setVisibleXRangeMaximum(10);
                 lineChart.moveViewToX(lineData.getEntryCount());
-
             }
+
+
 
             private void updateChartAxis(String formattedTimestamp) {
                 formattedTimestamps.add(formattedTimestamp);
@@ -277,21 +273,17 @@ public class ChartActivity extends MainActivity   {
                 lineChart.getXAxis().setValueFormatter(new ValueFormatter() {
                     @Override
                     public String getAxisLabel(float value, AxisBase axis) {
-                        // Sprawdź, czy indeks jest poprawny
                         int index = (int) value;
                         if (index >= 0 && index < formattedTimestamps.size()) {
                             return formattedTimestamps.get(index);
                         } else {
-                            return ""; // Jeśli indeks jest nieprawidłowy, zwróć pusty ciąg znaków
+                            return "";
                         }
                     }
                 });
 
                 lineChart.getXAxis().setPosition(XAxis.XAxisPosition.TOP);
             }
-
-
-
 
             @Override
             public void onBinaryReceived(byte[] data) {
@@ -310,7 +302,7 @@ public class ChartActivity extends MainActivity   {
 
             @Override
             public void onException(Exception e) {
-                Log.e("WebSocket", "Wystąpił wyjątek: " + e.getMessage());
+                Log.e("WebSocket", "Wystąpił wyjątek", e);
             }
 
             @Override
@@ -324,7 +316,4 @@ public class ChartActivity extends MainActivity   {
         webSocketClient.enableAutomaticReconnection(5000);
         webSocketClient.connect();
     }
-
-
-
 }

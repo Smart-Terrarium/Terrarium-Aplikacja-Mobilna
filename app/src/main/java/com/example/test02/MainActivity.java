@@ -24,7 +24,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends AppCompatActivity {
+
     private static final String TAG = "MainActivity";
 
     private EditText mEmailEditText;
@@ -36,13 +37,9 @@ public class MainActivity extends AppCompatActivity  {
     private TextView mTokenTextView;
     private TextView mEmailTextView;
 
-
-
-
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -53,7 +50,6 @@ public class MainActivity extends AppCompatActivity  {
         mTokenTextView = findViewById(R.id.tokenTextView);
         mEmailTextView = findViewById(R.id.emailTextView);
 
-
         mAuthToken = getIntent().getStringExtra("auth_token");
         mTokenTextView.setText(mAuthToken);
 
@@ -63,17 +59,16 @@ public class MainActivity extends AppCompatActivity  {
 
         mHttpClient = new OkHttpClient();
 
-
         mLoginButton.setOnClickListener(v -> {
-            String UserEmail = mEmailEditText.getText().toString();
+            String userEmail = mEmailEditText.getText().toString();
             String password = mPasswordEditText.getText().toString();
-            if (UserEmail.isEmpty() || password.isEmpty()) {
+            if (userEmail.isEmpty() || password.isEmpty()) {
                 Toast.makeText(MainActivity.this, "Email or password is empty", Toast.LENGTH_SHORT).show();
                 return;
             }
             JSONObject json = new JSONObject();
             try {
-                json.put("email", UserEmail);
+                json.put("email", userEmail);
                 json.put("password", password);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -82,28 +77,24 @@ public class MainActivity extends AppCompatActivity  {
         });
 
         mRegisterButton.setOnClickListener(v -> {
-            String UserEmail = mEmailEditText.getText().toString();
+            String userEmail = mEmailEditText.getText().toString();
             String password = mPasswordEditText.getText().toString();
-            if (UserEmail.isEmpty() || password.isEmpty()) {
+            if (userEmail.isEmpty() || password.isEmpty()) {
                 Toast.makeText(MainActivity.this, "Email or password is empty", Toast.LENGTH_SHORT).show();
                 return;
             }
             JSONObject json = new JSONObject();
             try {
-                json.put("email", UserEmail);
+                json.put("email", userEmail);
                 json.put("password", password);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             new RegisterTask().execute(json);
         });
-
     }
 
-
-
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
-
         @Override
         protected Boolean doInBackground(JSONObject... params) {
             if (params[0] == null) {
@@ -120,14 +111,14 @@ public class MainActivity extends AppCompatActivity  {
             try {
                 Response response = mHttpClient.newCall(request).execute();
                 if (response.isSuccessful()) {
-                    if(response.code()==200) {
+                    if (response.code() == 200) {
                         String responseBody = response.body().string();
                         JSONObject responseJson = new JSONObject(responseBody);
                         System.out.println(responseJson.toString());
                         mAuthToken = responseJson.getString("access_token");
-                    }
-                    else
+                    } else {
                         System.out.println("problem");
+                    }
                     return true;
                 } else {
                     return false;
@@ -152,16 +143,13 @@ public class MainActivity extends AppCompatActivity  {
                 Intent intent = new Intent(MainActivity.this, UserActivity.class);
                 intent.putExtra("auth_token", mAuthToken);
                 startActivity(intent);
-
             } else {
                 Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
             }
         }
-
     }
 
     private class RegisterTask extends AsyncTask<JSONObject, Void, Boolean> {
-
         @Override
         protected Boolean doInBackground(JSONObject... params) {
             if (params[0] == null) {
@@ -178,43 +166,23 @@ public class MainActivity extends AppCompatActivity  {
             try {
                 Response response = mHttpClient.newCall(request).execute();
                 if (response.isSuccessful()) {
-
-                    //switch(response.code())
-                    //{
-                      //  case 201:
-                      //  {return true;}
-                      //  case 409:
-                      //  {}return false;
-                      //  case 422:
-                       // {reutrn faslel;
-                       //     default:
-                      //          false
-                    //}
-                    if(response.code()==201) {
-                    System.out.println("udalo sie ");
+                    if (response.code() == 201) {
+                        System.out.println("udalo sie ");
                     }
-                    /*if(response.body().string().isEmpty()) {
-                        String responseBody = response.body().string();
-                        JSONObject responseJson = new JSONObject(responseBody);
-                        mAuthToken = responseJson.getString("auth_token");
-
-                    }*/
                     return true;
                 } else {
                     return false;
                 }
-            } catch (IOException  e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
         }
 
-
-
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
-                Toast.makeText(MainActivity.this, "Zarejestrowano! Zaloguj sie!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Zarejestrowano! Zaloguj się!", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
@@ -223,11 +191,8 @@ public class MainActivity extends AppCompatActivity  {
 
 
             } else {
-
                 Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
             }
-
         }
-
     }
 }

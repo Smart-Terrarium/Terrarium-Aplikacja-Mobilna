@@ -58,7 +58,9 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(deviceIntent);
                 break;
             case R.id.button_add_device:
-                startActivity(new Intent(this, NewDeviceActivity.class));
+                Intent deviceIntentDevice = new Intent(this, NewDeviceActivity.class);
+                deviceIntentDevice.putExtra("auth_token", token);
+                startActivity(deviceIntentDevice);
                 break;
             case R.id.button_notifications:
                 startActivity(new Intent(this, NotificationsActivity.class));
