@@ -3,6 +3,9 @@ package com.example.test02;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,9 +21,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
@@ -32,7 +37,15 @@ import java.util.Iterator;
 import java.util.List;
 
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+import okhttp3.Response;
+
 import tech.gusavila92.websocketclient.WebSocketClient;
+
 
 public class ChartActivity extends AppCompatActivity {
     private WebSocketClient webSocketClient;
@@ -43,12 +56,13 @@ public class ChartActivity extends AppCompatActivity {
     private SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private List<String> formattedTimestamps = new ArrayList<>();
     private String mAuthToken;
-    private String selectedDeviceId = "macasdasas";
-    private String selectedSensorId = "2";
+    private String selectedDeviceId;
+    private String selectedSensorId;
     private Spinner deviceSpinner;
     private Spinner sensorSpinner;
-    private List<Device> devices = new ArrayList<>();
-
+    private List<String> deviceNames = new ArrayList<>();
+    private List<String> sensorNames = new ArrayList<>();
+    private String selectedDevice;
 
     class Sensor {
         private final String id;
@@ -94,6 +108,119 @@ public class ChartActivity extends AppCompatActivity {
         }
     }
 
+    private List<String> deviceIds = new ArrayList<>();
+
+    private List<String> getListDeviceIds(String token) {
+        Request request = new Request.Builder().url("http://10.0.2.2:8000/devices").header("Authorization", "Bearer " + token).build();
+
+        OkHttpClient client = new OkHttpClient();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    if (response.code() == 200) {
+                        String responseBody = response.body().string();
+                        JSONArray responseJson = null;
+                        try {
+                            responseJson = new JSONArray(responseBody);
+                            for (int i = 0; i < responseJson.length(); i++) {
+                                JSONObject deviceJson = responseJson.getJSONObject(i);
+                                int deviceId = deviceJson.getInt("id");
+                                String deviceName = deviceJson.getString("mac_address");
+                                deviceNames.add(deviceName);
+                                deviceIds.add(String.valueOf(deviceId));
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(ChartActivity.this, android.R.layout.simple_spinner_item, deviceNames);
+                                    deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    deviceSpinner.setAdapter(deviceAdapter);
+
+                                    // Zaznacz wartość w sensorSpinner, jeśli jest dostępna
+                                    if (deviceNames.contains(selectedDeviceId)) {
+                                        int selectedDeviceIndex = deviceNames.indexOf(selectedDeviceId);
+                                        sensorSpinner.setSelection(selectedDeviceIndex);
+                                    }
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println(responseJson.toString());
+                    } else {
+                        System.out.println("problem");
+                    }
+                }
+            }
+        });
+
+        return deviceIds;
+    }
+
+    private void getListSensorsIds(String token, String selectedDevice) {
+        String url = "http://10.0.2.2:8000/device/" + selectedDevice;
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + token).build();
+
+        OkHttpClient client = new OkHttpClient();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    System.out.println(selectedDevice);
+                    if (response.code() == 200) {
+                        String responseBody = response.body().string();
+                        JSONArray responseJson = null;
+                        try {
+                            responseJson = new JSONObject(responseBody).getJSONArray("sensors");
+                            sensorNames.clear();
+                            for (int i = 0; i < responseJson.length(); i++) {
+                                JSONObject sensorJson = responseJson.getJSONObject(i);
+                                String sensorName = sensorJson.getString("id");
+                                sensorNames.add(sensorName);
+                            }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ArrayAdapter<String> sensorAdapter = new ArrayAdapter<>(ChartActivity.this, android.R.layout.simple_spinner_item, sensorNames);
+                                    sensorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    sensorSpinner.setAdapter(sensorAdapter);
+
+                                    // Zaznacz wartość w sensorSpinner, jeśli jest dostępna
+                                    if (sensorNames.contains(selectedSensorId)) {
+                                        int selectedSensorIndex = sensorNames.indexOf(selectedSensorId);
+                                        sensorSpinner.setSelection(selectedSensorIndex);
+                                    }
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println(responseJson.toString());
+                    } else {
+                        System.out.println("problem");
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +231,40 @@ public class ChartActivity extends AppCompatActivity {
         mAuthToken = getIntent().getStringExtra("auth_token");
         System.out.println("Token: " + mAuthToken);
 
+        getListDeviceIds(mAuthToken);
         createWebSocketClient();
+
+        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                if (position >= 0 && position < deviceIds.size()) {
+                    selectedDevice = deviceIds.get(position);
+                    getListSensorsIds(mAuthToken, selectedDevice);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        sensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+
+                if (position <sensorNames.size()) {
+                    selectedSensorId = sensorNames.get(position);
+                    if(deviceNames.size()!=0)
+                    selectedDeviceId = deviceNames.get(0);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
     private void createWebSocketClient() {
@@ -127,15 +287,15 @@ public class ChartActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 webSocketClient.send(json.toString());  // Wysłanie wiadomości w formacie JSON
-                webSocketClient.send("Hello World!");
 
             }
 
             @Override
             public void onTextReceived(String s) {
                 Log.i("WebSocket", "Odebrano wiadomość");
-
-
+                List<Device> devices = new ArrayList<>();
+                System.out.println("SENSOR " + selectedSensorId);
+                System.out.println("device " + selectedDeviceId);
                 try {
                     // Parsowanie otrzymanego ciągu JSON
                     JSONObject json = new JSONObject(s);
@@ -163,17 +323,17 @@ public class ChartActivity extends AppCompatActivity {
 
                     // Przetwarzanie danych czujników
                     for (Device device : devices) {
-                        System.out.println("ID urządzenia: " + device.getId());
+                        //  System.out.println("ID urządzenia: " + device.getId());
                         List<Sensor> sensors = device.getSensors();
                         for (Sensor sensor : sensors) {
-                            System.out.println("ID czujnika: " + sensor.getId());
-                            System.out.println("Timestamp: " + sensor.getTimestamp());
-                            System.out.println("Wartość: " + sensor.getValue());
+                            //    System.out.println("ID czujnika: " + sensor.getId());
+                            //    System.out.println("Timestamp: " + sensor.getTimestamp());
+                            //   System.out.println("Wartość: " + sensor.getValue());
                             String timestampString = sensor.getTimestamp();
                             try {
                                 Date timestamp = inputFormat.parse(timestampString);
                                 String formattedTimestamp = outputFormat.format(timestamp);
-                                System.out.println("Przetworzony timestamp: " + formattedTimestamp);
+                                //      System.out.println("Przetworzony timestamp: " + formattedTimestamp);
 
                                 if (device.getId().equals(selectedDeviceId) && sensor.getId().equals(selectedSensorId)) {
                                     runOnUiThread(new Runnable() {
@@ -189,11 +349,12 @@ public class ChartActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    System.out.println(devices.toString());
+
                 } catch (JSONException e) {
                     Log.e("WebSocket", "Błąd podczas parsowania JSON", e);
                 }
             }
+
             // Metoda do dodawania wpisu do wykresu
             private void addEntryToChart(double value, String timestamp) {
                 if (lineDataSet == null) {
@@ -264,7 +425,6 @@ public class ChartActivity extends AppCompatActivity {
                 lineChart.setVisibleXRangeMaximum(10);
                 lineChart.moveViewToX(lineData.getEntryCount());
             }
-
 
 
             private void updateChartAxis(String formattedTimestamp) {
