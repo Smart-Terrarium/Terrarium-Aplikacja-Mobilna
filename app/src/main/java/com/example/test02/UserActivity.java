@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import static android.content.Context.MODE_PRIVATE;
-
 public class UserActivity extends AppCompatActivity implements View.OnClickListener  {
 
     private TextView mEmailTextView;
@@ -63,7 +61,7 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(deviceIntentDevice);
                 break;
             case R.id.button_notifications:
-                startActivity(new Intent(this, NotificationsActivity.class));
+                startActivity(new Intent(this, ConnectFTPActivity.class));
                 break;
         }
     }

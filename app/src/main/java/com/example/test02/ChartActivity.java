@@ -1,5 +1,6 @@
 package com.example.test02;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -250,6 +251,7 @@ public class ChartActivity extends AppCompatActivity {
         });
 
         sensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @SuppressLint("SuspiciousIndentation")
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
 
