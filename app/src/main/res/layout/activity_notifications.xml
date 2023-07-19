@@ -5,9 +5,15 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <ListView
-        android:id="@+id/deviceListView"
+
+    <Button
+        android:id="@+id/get_notifications_button"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:inputType="text"
+        android:text="Pobierz powiadomienia"/>
+
+
 
 </RelativeLayout>

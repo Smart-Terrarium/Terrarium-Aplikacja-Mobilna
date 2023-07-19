@@ -18,6 +18,7 @@
         android:layout_height="match_parent"
         android:background="#88000000"
         android:alpha="0.4" />
+
     <TextView
         android:id="@+id/tokenTextView"
         android:layout_width="wrap_content"
@@ -65,11 +66,11 @@
         style="@style/ButtonStyle"
         android:textColorHint="#EBFFFFFF"/>
     <Button
-        android:id="@+id/button_add_device"
+        android:id="@+id/button_notifications"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Dodaj urządzenie"
+        android:text="Powiadomienia"
         tools:ignore="MissingConstraints"
         app:layout_constraintTop_toBottomOf="@id/button_chart"
         app:layout_constraintStart_toStartOf="parent"
@@ -77,13 +78,13 @@
         style="@style/ButtonStyle"
         android:textColorHint="#EBFFFFFF"/>
     <Button
-        android:id="@+id/button_notifications"
+        android:id="@+id/button_FTPActivity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="FTP"
         tools:ignore="MissingConstraints"
-        app:layout_constraintTop_toBottomOf="@id/button_add_device"
+        app:layout_constraintTop_toBottomOf="@id/button_notifications"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         style="@style/ButtonStyle"

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -30,7 +31,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
 
-public class ConnectFTPActivity extends Activity implements OnClickListener {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class ConnectFTPActivity extends UserActivity implements OnClickListener {
 
     private Button uploadButton;
     private Button downloadButton;
@@ -39,6 +53,13 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
     private EditText passwordEditText;
     private EditText ssidEditText;
     private EditText passwordssidEditText;
+    private String token;
+    private EditText nameEditText;
+    private EditText macAddressEditText;
+    private Button addButton;
+    private Button clearButton;
+    private String mAuthToken;
+    private OkHttpClient client;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -56,6 +77,83 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
 
         uploadButton.setOnClickListener(this);
         downloadButton.setOnClickListener(this);
+
+        nameEditText = findViewById(R.id.nameEditText);
+        macAddressEditText = findViewById(R.id.macAddressEditText);
+        addButton = findViewById(R.id.addButton);
+        clearButton = findViewById(R.id.clearButton);
+
+// Pobieramy referencję do EditText
+        EditText macAddressEditText = findViewById(R.id.macAddressEditText);
+
+// Ustawiamy, że EditText nie jest focusable, co uniemożliwia edycję tekstu przez użytkownika
+        macAddressEditText.setFocusable(false);
+
+        client = new OkHttpClient();
+        mAuthToken = getIntent().getStringExtra("auth_token");
+        System.out.println(mAuthToken);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearFields();
+            }
+        });
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = nameEditText.getText().toString();
+                String macAddress = macAddressEditText.getText().toString();
+                addNewDevice(name, macAddress);
+            }
+        });
+    }
+
+    private void addNewDevice(String name, String macAddress) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("name", name);
+            jsonObject.put("mac_address", macAddress);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+        RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
+
+        Request request = new Request.Builder().url("http://10.0.2.2:8000/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                showToast("Request failed");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    showToast("Device with MAC address " + macAddress + " added");
+                } else {
+                    showToast("Request unsuccessful");
+                }
+            }
+        });
+    }
+
+    private void clearFields() {
+        nameEditText.setText("");
+        macAddressEditText.setText("");
+    }
+
+    private void showToast(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ConnectFTPActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -67,6 +165,7 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
             case R.id.downloadButton:
                 new DownloadTask().execute();
                 break;
+
         }
     }
 
@@ -81,16 +180,15 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
 
             JSONObject hotspotData = new JSONObject();
             try {
-                hotspotData.put("ssiddddd", ssid);
-                hotspotData.put("passworddddd", passwordssid);
+                hotspotData.put("ssid", ssid);
+                hotspotData.put("password", passwordssid);
 
                 String jsonData = hotspotData.toString();
 
                 // Zapisz dane do pliku
                 String filePath = "/storage/emulated/0/Download/example3.txt";
                 File xxx = new File(filePath);
-                if(xxx.exists())
-                {
+                if (xxx.exists()) {
                     xxx.delete();
                     System.out.println(jsonData);
                 }
@@ -128,14 +226,15 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
         }
     }
 
-    private class DownloadTask extends AsyncTask<Void, Void, Void> {
+    private class DownloadTask extends AsyncTask<Void, Void, String> {
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             String hostname = hostnameEditText.getText().toString();
             String username = usernameEditText.getText().toString();
             String password = passwordEditText.getText().toString();
 
             FTPClient ftp = new FTPClient();
+            String macAddress = null;
             try {
                 ftp.connect(hostname);
                 ftp.enterLocalPassiveMode();
@@ -149,27 +248,59 @@ public class ConnectFTPActivity extends Activity implements OnClickListener {
 
                 ftp.retrieveFile("/apk/example.txt", outputStream);
 
-                System.out.println("TEST222");
+                // Close the output stream
+                outputStream.close();
 
-                // ftp.deleteFile("/apk/example.txt"); // Usuwanie pliku
-                System.out.println(ftp.getReplyString());
+                // Parse the downloaded JSON file and extract the mac_address
+                FileInputStream inputStream = new FileInputStream(outputFile);
+                byte[] buffer = new byte[inputStream.available()];
+                inputStream.read(buffer);
+                inputStream.close();
+
+                if (buffer.length > 0) {
+                    String jsonData = new String(buffer, "UTF-8");
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    macAddress = jsonObject.getString("mac_address");
+                    System.out.println("Extracted MAC Address: " + macAddress);
+
+                    // Delete the downloaded file after extracting the MAC address
+                    outputFile.delete();
+                } else {
+                    System.out.println("Downloaded JSON file is empty");
+                }
+
                 ftp.logout();
                 ftp.disconnect();
-                outputStream.close();
             } catch (SocketException e) {
                 System.out.println("Błąd SocketException");
-                // Obsługa błędu połączenia SocketException
+                // Handle SocketException
                 e.printStackTrace();
             } catch (IOException e) {
                 System.out.println("Błąd IOException");
-                // Obsługa błędów wejścia/wyjścia IOException
+                // Handle IOException
+                e.printStackTrace();
+            } catch (JSONException e) {
+                System.out.println("Błąd JSONException");
+                // Handle JSONException
                 e.printStackTrace();
             } catch (Exception e) {
                 System.out.println("Inny błąd");
-                // Obsługa ogólnych błędów
+                // Handle other exceptions
                 e.printStackTrace();
             }
-            return null;
+            return macAddress;
+        }
+
+        @Override
+        protected void onPostExecute(String macAddress) {
+            // Update the macAddressEditText field with the extracted mac_address
+            if (macAddress != null) {
+                macAddressEditText.setText(macAddress);
+                showToast("MAC Address retrieved successfully");
+            } else {
+                showToast("Error retrieving MAC Address");
+            }
         }
     }
 }
+

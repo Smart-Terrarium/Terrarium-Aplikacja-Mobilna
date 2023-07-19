@@ -54,7 +54,7 @@
 
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.NewDeviceActivity"
+        <activity android:name="com.example.test02.NotificationsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

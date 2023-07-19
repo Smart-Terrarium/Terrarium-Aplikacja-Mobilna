@@ -14,9 +14,9 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView mEmailTextView;
     private TextView mTokenTextView;
-    private Button heatChart;
-    private Button newDevice;
-    private Button notifications;
+    private Button button_Chart;
+    private Button button_notifications;
+    private Button FTPActivity;
     private String token; // Deklaracja zmiennej token
 
     @SuppressLint("MissingInflatedId")
@@ -38,14 +38,14 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
         String email = sharedPreferences.getString("email", "");
         mEmailTextView.setText("Witaj " + email);
 
-        heatChart = findViewById(R.id.button_chart);
-        heatChart.setOnClickListener(this);
+        button_Chart = findViewById(R.id.button_chart);
+        button_Chart.setOnClickListener(this);
 
-        newDevice = findViewById(R.id.button_add_device);
-        newDevice.setOnClickListener(this);
+        button_notifications = findViewById(R.id.button_notifications);
+        button_notifications.setOnClickListener(this);
 
-        notifications = findViewById(R.id.button_notifications);
-        notifications.setOnClickListener(this);
+        FTPActivity = findViewById(R.id.button_FTPActivity);
+        FTPActivity.setOnClickListener(this);
     }
     @Override
     public void onClick(View v) {
@@ -55,13 +55,15 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
                 deviceIntent.putExtra("auth_token", token);
                 startActivity(deviceIntent);
                 break;
-            case R.id.button_add_device:
-                Intent deviceIntentDevice = new Intent(this, NewDeviceActivity.class);
+            case R.id.button_notifications:
+                Intent deviceIntentDevice = new Intent(this, NotificationsActivity.class);
                 deviceIntentDevice.putExtra("auth_token", token);
                 startActivity(deviceIntentDevice);
                 break;
-            case R.id.button_notifications:
-                startActivity(new Intent(this, ConnectFTPActivity.class));
+            case R.id.button_FTPActivity:
+                Intent deviceIntentFTPActivity = new Intent(this, ConnectFTPActivity.class);
+                deviceIntentFTPActivity.putExtra("auth_token", token);
+                startActivity(deviceIntentFTPActivity);
                 break;
         }
     }
