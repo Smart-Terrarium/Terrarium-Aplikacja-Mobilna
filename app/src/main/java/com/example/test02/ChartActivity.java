@@ -229,7 +229,7 @@ public class ChartActivity extends AppCompatActivity {
         lineChart = findViewById(R.id.lineChart);
         deviceSpinner = findViewById(R.id.deviceSpinner);
         sensorSpinner = findViewById(R.id.sensorSpinner);
-        mAuthToken = getIntent().getStringExtra("auth_token");
+        mAuthToken  = getIntent().getStringExtra("auth_token");
         System.out.println("Token: " + mAuthToken);
 
         getListDeviceIds(mAuthToken);
