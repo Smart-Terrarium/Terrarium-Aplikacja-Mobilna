@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.annotations.SerializedName;
+
 public class UserActivity extends AppCompatActivity implements View.OnClickListener  {
 
     private TextView mEmailTextView;
@@ -19,6 +21,21 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
     private Button FTPActivity;
     private String token; // Deklaracja zmiennej token
 
+    public class Notification {
+        @SerializedName("title")
+        private String title;
+
+        @SerializedName("description")
+        private String description;
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
     @SuppressLint("MissingInflatedId")
 
     @Override
@@ -46,6 +63,10 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
 
         FTPActivity = findViewById(R.id.button_FTPActivity);
         FTPActivity.setOnClickListener(this);
+
+        Intent serviceIntent = new Intent(this, BackgroundNotificationService.class);
+        serviceIntent.putExtra("auth_token", token);
+        startService(serviceIntent);
     }
     @Override
     public void onClick(View v) {

@@ -1,5 +1,8 @@
 package com.example.test02;
 
+import static com.example.test02.MainActivity.BaseUrl.BASE_URL;
+
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -36,6 +39,19 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient mHttpClient;
     private TextView mTokenTextView;
     private TextView mEmailTextView;
+
+    /*
+           ////////////////////////////////////////////////////////////
+            miejsce na podmiane adresów globalnie
+            websocket jest używany do wyświetlania danych na wykresach
+           ///////////////////////////////////////////////////////////
+     */
+    public class BaseUrl {
+        public static final String BASE_URL = "http://10.0.2.2:8000";
+    }
+    public class BaseWebsocketUrl {
+        public static final String BASE_WEBSOCKET_URL = "ws://192.168.88.252:8000";
+    }
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -104,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
             Request request = new Request.Builder()
-                    .url("http://10.0.2.2:8000/login")
+                    .url(BASE_URL + "/login")
                     .post(formBody)
                     .build();
 
@@ -159,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
             Request request = new Request.Builder()
-                    .url("http://10.0.2.2:8000/register")
+                    .url(BASE_URL + "/register")
                     .post(formBody)
                     .build();
 

@@ -121,7 +121,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
 
-        Request request = new Request.Builder().url("http://10.0.2.2:8000/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
+        Request request = new Request.Builder().url(MainActivity.BaseUrl.BASE_URL + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

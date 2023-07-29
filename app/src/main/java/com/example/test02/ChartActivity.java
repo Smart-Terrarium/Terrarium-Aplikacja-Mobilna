@@ -112,7 +112,7 @@ public class ChartActivity extends AppCompatActivity {
     private List<String> deviceIds = new ArrayList<>();
 
     private List<String> getListDeviceIds(String token) {
-        Request request = new Request.Builder().url("http://10.0.2.2:8000/devices").header("Authorization", "Bearer " + token).build();
+        Request request = new Request.Builder().url(MainActivity.BaseUrl.BASE_URL + "/devices").header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
 
@@ -156,7 +156,7 @@ public class ChartActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        System.out.println(responseJson.toString());
+                        // System.out.println(responseJson.toString());
                     } else {
                         System.out.println("problem");
                     }
@@ -168,7 +168,7 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     private void getListSensorsIds(String token, String selectedDevice) {
-        String url = "http://10.0.2.2:8000/device/" + selectedDevice;
+        String url = MainActivity.BaseUrl.BASE_URL + "/device/" + selectedDevice;
         Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
@@ -272,7 +272,7 @@ public class ChartActivity extends AppCompatActivity {
     private void createWebSocketClient() {
         URI uri;
         try {
-            uri = new URI("ws://192.168.88.252:8000/device/1/sensor/data");
+            uri = new URI(MainActivity.BaseWebsocketUrl.BASE_WEBSOCKET_URL + "/device/1/sensor/data");
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;
@@ -295,9 +295,10 @@ public class ChartActivity extends AppCompatActivity {
             @Override
             public void onTextReceived(String s) {
                 Log.i("WebSocket", "Odebrano wiadomość");
+                System.out.println(s);
                 List<Device> devices = new ArrayList<>();
-                System.out.println("SENSOR " + selectedSensorId);
-                System.out.println("device " + selectedDeviceId);
+                System.out.println("SENSORRRRR " + selectedSensorId);
+                System.out.println("deviceeeee " + selectedDeviceId);
                 try {
                     // Parsowanie otrzymanego ciągu JSON
                     JSONObject json = new JSONObject(s);
@@ -305,7 +306,8 @@ public class ChartActivity extends AppCompatActivity {
                     while (keys.hasNext()) {
                         String id = keys.next();
                         JSONObject deviceObject = json.getJSONObject(id);
-
+                        System.out.println("SENSORRRRR " + selectedSensorId);
+                        System.out.println("deviceeeee " + selectedDeviceId);
                         // Tworzenie obiektu urządzenia
                         Device device = new Device(id);
                         // Iteracja po czujnikach w danym urządzeniu
@@ -454,7 +456,7 @@ public class ChartActivity extends AppCompatActivity {
 
             @Override
             public void onPingReceived(byte[] data) {
-                Log.i("WebSocket", "Odebrano ping");
+               // Log.i("WebSocket", "Odebrano ping");
             }
 
             @Override
