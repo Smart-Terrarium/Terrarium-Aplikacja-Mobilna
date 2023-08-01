@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class BackgroundNotificationService extends Service {
 
     private String token;
-    private static final long INTERVAL = 1000 * 60 * 15; // 15 minut
+    private static final long INTERVAL = 1000 * 60; // 15 minut
     private Handler handler = new Handler();
     private Runnable runnable = new Runnable() {
         @Override
@@ -111,27 +111,6 @@ public class BackgroundNotificationService extends Service {
         // Rozpoczęcie cyklicznego sprawdzania powiadomień
         handler.postDelayed(runnable, INTERVAL);
 
-        // Start the service as a foreground service with a notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "channel_id";
-            CharSequence channelName = "Channel Name";
-            String channelDescription = "Channel Description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel notificationChannel =
-                    new NotificationChannel(channelId, channelName, importance);
-            notificationChannel.setDescription(channelDescription);
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel);
-
-            Notification notification = new NotificationCompat.Builder(this, channelId)
-                    .setContentTitle("Foreground Service")
-                    .setContentText("Service is running in the background")
-                    .setSmallIcon(R.drawable.background) // Replace with your notification icon
-                    .build();
-
-            startForeground(1, notification);
-        }
 
         return START_STICKY;
     }

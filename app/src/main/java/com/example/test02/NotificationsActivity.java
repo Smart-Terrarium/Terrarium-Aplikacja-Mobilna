@@ -254,8 +254,6 @@ public class NotificationsActivity extends AppCompatActivity {
                                     String description = notification.getString("description");
                                     notificationList.add(description);
 
-                                    // Wyswietlenie powiadomienia systemowego dla każdego nowego powiadomienia
-                                    showSystemNotification("Nowe powiadomienie", description);
                                 }
                                 notificationAdapter.notifyDataSetChanged();
                             } catch (JSONException e) {

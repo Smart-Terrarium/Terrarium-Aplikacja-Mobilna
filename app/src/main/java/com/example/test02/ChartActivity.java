@@ -66,21 +66,22 @@ public class ChartActivity extends AppCompatActivity {
     private String selectedDevice;
 
     class Sensor {
-        private final String id;
+        private final String pin_number;
         private final String timestamp;
         private final double value;
         private String formattedTimestamp;
 
-        public Sensor(String id, String timestamp, double value) {
-            this.id = id;
+        public Sensor(String pin_number, String timestamp, double value) {
+            this.pin_number = pin_number;
             this.timestamp = timestamp;
             this.value = value;
             this.formattedTimestamp = "";
         }
-
-        public String getId() {
-            return id;
+        public String getPin_number(){
+            return pin_number;
         }
+
+
 
         public String getTimestamp() {
             return timestamp;
@@ -191,7 +192,7 @@ public class ChartActivity extends AppCompatActivity {
                             sensorNames.clear();
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject sensorJson = responseJson.getJSONObject(i);
-                                String sensorName = sensorJson.getString("id");
+                                String sensorName = sensorJson.getString("pin_number");
                                 sensorNames.add(sensorName);
                             }
 
@@ -330,7 +331,7 @@ public class ChartActivity extends AppCompatActivity {
                         //  System.out.println("ID urządzenia: " + device.getId());
                         List<Sensor> sensors = device.getSensors();
                         for (Sensor sensor : sensors) {
-                            //    System.out.println("ID czujnika: " + sensor.getId());
+                                System.out.println("ID czujnika: " + sensor.getPin_number());
                             //    System.out.println("Timestamp: " + sensor.getTimestamp());
                             //   System.out.println("Wartość: " + sensor.getValue());
                             String timestampString = sensor.getTimestamp();
@@ -339,7 +340,7 @@ public class ChartActivity extends AppCompatActivity {
                                 String formattedTimestamp = outputFormat.format(timestamp);
                                 //      System.out.println("Przetworzony timestamp: " + formattedTimestamp);
 
-                                if (device.getId().equals(selectedDeviceId) && sensor.getId().equals(selectedSensorId)) {
+                                if (device.getId().equals(selectedDeviceId) && sensor.getPin_number().equals(selectedSensorId)) {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -479,5 +480,22 @@ public class ChartActivity extends AppCompatActivity {
         webSocketClient.setReadTimeout(60000);
         webSocketClient.enableAutomaticReconnection(5000);
         webSocketClient.connect();
+    }  @Override
+    protected void onPause() {
+        super.onPause();
+        closeWebSocket();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        closeWebSocket();
+    }
+
+    private void closeWebSocket() {
+        if (webSocketClient != null) {
+            webSocketClient.close();
+            webSocketClient = null;
+        }
     }
 }
