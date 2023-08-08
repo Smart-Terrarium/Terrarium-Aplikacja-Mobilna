@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import org.json.JSONException;
 import android.content.Intent;
@@ -39,20 +40,21 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient mHttpClient;
     private TextView mTokenTextView;
     private TextView mEmailTextView;
+    private EditText mBaseUrlEditText;
 
-    /*
-           ////////////////////////////////////////////////////////////
-            miejsce na podmiane adresów globalnie
-            websocket jest używany do wyświetlania danych na wykresach
-           ///////////////////////////////////////////////////////////
-     */
+
     public class BaseUrl {
         public static final String BASE_URL = "http://10.0.2.2:8000";
     }
-    public class BaseWebsocketUrl {
-        public static final String BASE_WEBSOCKET_URL = "ws://192.168.88.252:8000";
+    private static String BASE_URL = "http://10.0.2.2:8000";
+
+    public static String getBaseUrl() {
+        return BASE_URL;
     }
 
+    public static void setBaseUrl(String baseUrl) {
+        BASE_URL = baseUrl;
+    }
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +74,17 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", "");
         mEmailTextView.setText(email);
+        mBaseUrlEditText = findViewById(R.id.baseUrlEditText);
 
         mHttpClient = new OkHttpClient();
+
+        @SuppressLint("WrongViewCast")
+
+        ImageButton UrlActivityButton = findViewById(R.id.settingsButton);
+        UrlActivityButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, UrlActivity.class);
+            startActivity(intent);
+        });
 
         mLoginButton.setOnClickListener(v -> {
             String userEmail = mEmailEditText.getText().toString();
@@ -119,10 +130,21 @@ public class MainActivity extends AppCompatActivity {
             JSONObject json = params[0];
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
+            String baseUrl = MainActivity.getBaseUrl();
+            if (baseUrl.isEmpty()) {
+                baseUrl = BASE_URL;
+            }
+
+
+            if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+                baseUrl = "http://" + baseUrl;
+            }
+
             Request request = new Request.Builder()
-                    .url(BASE_URL + "/login")
+                    .url(baseUrl + "/login")
                     .post(formBody)
                     .build();
+
 
             try {
                 Response response = mHttpClient.newCall(request).execute();
@@ -174,8 +196,16 @@ public class MainActivity extends AppCompatActivity {
             JSONObject json = params[0];
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
+            String baseUrl = MainActivity.getBaseUrl();
+            if (baseUrl.isEmpty()) {
+                baseUrl = BASE_URL;
+            }
+
+            if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+                baseUrl = "http://" + baseUrl;
+            }
             Request request = new Request.Builder()
-                    .url(BASE_URL + "/register")
+                    .url(baseUrl + "/register")
                     .post(formBody)
                     .build();
 

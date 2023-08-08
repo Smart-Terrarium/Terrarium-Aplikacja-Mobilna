@@ -59,7 +59,8 @@ dependencies {
     implementation 'commons-net:commons-net:3.6'
 
     implementation 'com.google.code.gson:gson:2.8.8'
-    implementation 'com.google.firebase:firebase-messaging:20.1.0'
+    implementation 'com.google.firebase:firebase-messaging:23.0.0'
+
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

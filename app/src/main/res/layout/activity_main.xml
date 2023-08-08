@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,18 +9,38 @@
     tools:context=".MainActivity"
     android:background="#676767">
 
-    <ImageView
-        android:id="@+id/backgroundImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/background" />
 
-    <View
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#88000000"
-        android:alpha="0.4" />
+        android:layout_height="match_parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.4"
+            android:background="#88000000" />
+
+        <ImageView
+            android:id="@+id/backgroundImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/background" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#77000000" />
+
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="184dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/logo"
+            android:layout_marginTop="46dp"/>
+    </RelativeLayout>
+
 
     <TextView
         android:id="@+id/tokenTextView"
@@ -30,31 +51,33 @@
         tools:layout_editor_absoluteX="44dp"
         tools:layout_editor_absoluteY="412dp"
         android:visibility="gone"/>
+
+
     <TextView
         android:id="@+id/emailTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/token"
+        android:visibility="gone"
         tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="44dp"
-        tools:layout_editor_absoluteY="412dp"
-        android:visibility="gone"/>
+        tools:layout_editor_absoluteX="78dp"
+        tools:layout_editor_absoluteY="145dp" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="256dp"
         android:autofillHints=""
         android:hint="Adres email"
-        android:minHeight="48dp"
         android:padding="8dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#EBFFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/emailTextView" />
+
     <View
         android:layout_width="0dp"
         android:layout_height="2dp"
@@ -121,6 +144,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/registerButton" />
 
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Settings"
+        android:src="@drawable/ic_baseline_settings_24"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/forgotPasswordButton"
+        app:layout_constraintVertical_bias="0.5"/>
 
 
 

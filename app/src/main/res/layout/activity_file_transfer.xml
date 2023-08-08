@@ -1,124 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/backgroundImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#77000000"
+        tools:layout_editor_absoluteX="-4dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <TextView
         android:id="@+id/nameLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name:"
+        android:text="Nazwa urządzenia:"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="42dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="42dp" />
 
     <EditText
         android:id="@+id/nameEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/nameLabel"
+        android:layout_width="404dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:inputType="text"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="64dp"
-        app:layout_constraintTop_toBottomOf="@id/nameLabel"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nameLabel" />
 
     <TextView
         android:id="@+id/macAddressLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/nameEditText"
         android:text="MAC Address:"
+        android:hint="Pobierz MAC poprzez DOWNLOAD button"
         android:textSize="16sp"
         android:textStyle="bold"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="109dp"
-        app:layout_constraintTop_toBottomOf="@id/nameEditText"/>
+        app:layout_constraintTop_toBottomOf="@id/nameEditText"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp" />
 
     <EditText
         android:id="@+id/macAddressEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/macAddressLabel"
+        app:layout_constraintTop_toBottomOf="@id/macAddressLabel"
+        android:layout_marginTop="8dp"
         android:inputType="none"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="131dp"
-        app:layout_constraintTop_toBottomOf="@id/macAddressLabel"/>
-
-    <Button
-        android:id="@+id/addButton"
-        android:layout_width="387dp"
-        android:layout_height="56dp"
-        android:layout_below="@id/macAddressEditText"
-        android:text="Add Device"
-        app:layout_constraintTop_toBottomOf="@id/macAddressEditText"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="66dp" />
-
-    <Button
-        android:id="@+id/clearButton"
-        android:layout_width="384dp"
-        android:layout_height="45dp"
-        android:layout_below="@id/addButton"
-        android:text="Clear"
-        app:layout_constraintTop_toBottomOf="@id/addButton"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="66dp" />
-
-    <Button
-        android:id="@+id/uploadButton"
-        style="@style/ButtonStyle"
-        android:layout_width="375dp"
-        android:layout_height="48dp"
-        android:backgroundTint="#E6FFFFFF"
-        android:text="uploadButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.567"
         app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteY="352dp"
-        app:layout_constraintTop_toBottomOf="@id/clearButton"/>
-
-    <Button
-        android:id="@+id/downloadButton"
-        style="@style/ButtonStyle"
-        android:layout_width="375dp"
-        android:layout_height="48dp"
-        android:backgroundTint="#E6FFFFFF"
-        android:text="downloadButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.555"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/uploadButton"
-        tools:layout_editor_absoluteY="91dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/hostnameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Hostname"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="136dp"
-        app:layout_constraintTop_toBottomOf="@id/downloadButton"
-        android:text="ftp.nordplus.com.pl"/>
+        app:layout_constraintTop_toBottomOf="@id/macAddressEditText"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="ftp.nordplus.com.pl" />
 
     <EditText
         android:id="@+id/usernameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Username"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="194dp"
         app:layout_constraintTop_toBottomOf="@id/hostnameEditText"
-        android:text="smallbusiness"/>
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="smallbusiness" />
 
     <EditText
         android:id="@+id/passwordEditText"
@@ -126,30 +96,63 @@
         android:layout_height="wrap_content"
         android:hint="Password"
         android:inputType="textPassword"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="248dp"
         app:layout_constraintTop_toBottomOf="@id/usernameEditText"
-        android:text="sm@LL123"/>
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="sm@LL123" />
 
     <EditText
         android:id="@+id/ssidEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="248dp"
         app:layout_constraintTop_toBottomOf="@id/passwordEditText"
-        />
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <EditText
         android:id="@+id/passwordssidEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="248dp"
+        android:layout_marginTop="28dp"
         app:layout_constraintTop_toBottomOf="@id/ssidEditText"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <Button
+        android:id="@+id/uploadButton"
+        style="@style/ButtonStyle"
+        android:layout_width="375dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#E6FFFFFF"
+        android:text="Pobierz konfiguracje"
+        app:layout_constraintTop_toBottomOf="@id/passwordssidEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="25dp" />
+
+    <Button
+        android:id="@+id/downloadButton"
+        style="@style/ButtonStyle"
+        android:layout_width="375dp"
+        android:layout_height="48dp"
+        android:backgroundTint="#E6FFFFFF"
+        android:text="Wyślij konfiguracje"
+        app:layout_constraintTop_toBottomOf="@id/uploadButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/addButton"
+        style="@style/ButtonStyle"
+        android:layout_width="384dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="#E6FFFFFF"
+        android:text="Dodaj urządzenie"
+        app:layout_constraintTop_toBottomOf="@id/downloadButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

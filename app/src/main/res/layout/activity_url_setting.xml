@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context=".UrlActivity">
+
+    <!-- Zdjęcie w tle, zajmujące cały ekran -->
+    <ImageView
+        android:id="@+id/backgroundImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background" />
+
+    <!-- Półprzezroczysta warstwa na zdjęciu w tle -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.4"
+        android:background="#88000000" />
+
+    <!-- Kontener dla pozostałych elementów interfejsu -->
+    <RelativeLayout
+        android:layout_width="402dp"
+        android:layout_height="710dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp">
+
+        <!-- Pozostałe elementy interfejsu -->
+        <EditText
+            android:id="@+id/baseUrlEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="46dp"
+            android:layout_marginBottom="16dp"
+            android:hint="Zmiana adresu URL"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#FFFFFF" />
+
+        <Button
+            android:id="@+id/saveButton"
+            style="@style/ButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/baseUrlEditText"
+            android:layout_centerHorizontal="true"
+            android:text="Save"
+            android:textColorHint="#FFFFFF" />
+
+    </RelativeLayout>
+</RelativeLayout>

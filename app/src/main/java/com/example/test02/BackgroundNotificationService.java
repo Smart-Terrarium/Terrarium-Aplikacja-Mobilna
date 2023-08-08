@@ -15,126 +15,106 @@ import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 public class BackgroundNotificationService extends Service {
 
     private String token;
-    private static final long INTERVAL = 1000 * 60; // 15 minut
-    private Handler handler = new Handler();
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Sprawdzanie nowych powiadomień
-            new CheckNotificationsTask().execute();
-
-            handler.postDelayed(this, INTERVAL);
-        }
-    };
-
-    // Lista przechowująca identyfikatory wcześniej wyświetlonych powiadomień
-    private ArrayList<Integer> displayedNotificationIds = new ArrayList<>();
-
-    private class CheckNotificationsTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            // Sprawdzanie nowych powiadomień
-            checkNotifications();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            // Możemy wykonać dodatkowe działania po zakończeniu sprawdzania powiadomień, jeśli to potrzebne
-        }
-    }
-
-    private void checkNotifications() {
-        // Tworzenie zapytania HTTP GET do pobrania powiadomień
-        String apiUrl = MainActivity.BaseUrl.BASE_URL + "/devices/alerts?sort_by_priority=true&only_served=false";
-        try {
-            URL url = new URL(apiUrl);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Authorization", "Bearer " + token);
-
-            // Odczytanie odpowiedzi
-            InputStream inputStream = urlConnection.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            bufferedReader.close();
-            String response = stringBuilder.toString();
-
-            // Przetworzenie odpowiedzi JSON
-            JSONArray jsonArray = new JSONArray(response);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject alertObject = jsonArray.getJSONObject(i);
-                boolean served = alertObject.getBoolean("served");
-                int notificationId = alertObject.getInt("id"); // Pobranie identyfikatora powiadomienia
-
-                if (!served && !displayedNotificationIds.contains(notificationId)) {
-                    // Jeżeli powiadomienie nie zostało obsłużone i nie zostało wcześniej wyświetlone,
-                    // pokaż je jako systemowe powiadomienie
-                    String description = alertObject.getString("description");
-                    showSystemNotification("Nowe powiadomienie", description);
-                    displayedNotificationIds.add(notificationId); // Dodanie identyfikatora do listy wyświetlonych powiadomień
-                }
-            }
-        } catch (IOException | JSONException e) {
-            Log.e("BackgroundNotification", "Błąd podczas pobierania powiadomień: " + e.getMessage());
-        }
-    }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Pobranie tokenu z Intentu
         if (intent != null) {
             token = intent.getStringExtra("auth_token");
+        } else {
+            stopSelf(); // Zakończ usługę
+            return START_NOT_STICKY;
         }
 
-        // Rozpoczęcie cyklicznego sprawdzania powiadomień
-        handler.postDelayed(runnable, INTERVAL);
 
+        new Thread(new Runnable() {
+            public void run() {
+                startSSEConnection();
+            }
+        }).start();
 
         return START_STICKY;
     }
 
+    private void startSSEConnection() {
+        try {
+            URL url = new URL("http://10.0.2.2:8000/devices/notifier/alerts");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+            connection.setRequestProperty("Accept", "text/event-stream");
+            System.out.println(token + "TTTTTTTTTTTTTT");
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+                BufferedReader reader = new BufferedReader(inputStreamReader);
 
-    @Override
-    public void onDestroy() {
-        // Remove the foreground state and stop the service
-        stopForeground(true);
-        handler.removeCallbacks(runnable);
-        super.onDestroy();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("data:")) {
+                        String eventData = line.substring(6).trim();
+                        processEventData(eventData);
+                    }
+                }
+            }
+
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    private void processEventData(String eventData) {
+        try {
+            Log.d("SSE", "Received event data: " + eventData);
+
+
+            System.out.println("Event Data: " + eventData);
+
+
+            eventData = eventData.replace("macasdasas", "");
+
+            JSONObject eventJson = new JSONObject(eventData);
+            String type = eventJson.optString("type");
+            if ("report".equals(type)) {
+                JSONObject payload = eventJson.optJSONObject("payload");
+                if (payload != null) {
+                    JSONObject alert = payload.optJSONObject("alert");
+                    if (alert != null) {
+                        String macAddress = alert.optString("mac_address");
+                        int alertNumber = alert.optInt("alert_number");
+                        String description = alert.optString("description");
+                        int priority = alert.optInt("priority");
+
+
+                        showSystemNotification("Alert: " + description, "Priority: " + priority);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("SSE", "Error parsing JSON: " + e.getMessage());
+        }
     }
+
+
 
     private void showSystemNotification(String title, String message) {
         Context context = getApplicationContext();
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Notification Channel (Required for Android Oreo and above)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "channel_id";
             CharSequence channelName = "Channel Name";
@@ -146,20 +126,22 @@ public class BackgroundNotificationService extends Service {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
-        // Build the notification
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
-                .setSmallIcon(R.drawable.background) // Replace with your notification icon
+                .setSmallIcon(R.drawable.background)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
 
-        // Show the notification
+
         int notificationId = 1;
         Notification notification = builder.build();
         notificationManager.notify(notificationId, notification);
     }
 
-
-
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 }

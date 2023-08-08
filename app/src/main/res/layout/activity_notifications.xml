@@ -1,15 +1,60 @@
-<!-- activity_notifications.xml -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Lista powiadomień -->
-    <ListView
-        android:id="@+id/notificationListView"
+    <!-- Background Overlays -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <!-- Przycisk do dodawania nowego powiadomienia -->
+        <!-- Dark Overlay with Alpha -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.4"
+            android:background="#88000000" />
 
+        <!-- Background Image -->
+        <ImageView
+            android:id="@+id/backgroundImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/background" />
+
+        <!-- Light Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#77000000" />
+
+    </RelativeLayout>
+
+    <!-- ScrollView to wrap content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/backgroundImageView"
+        android:layout_marginTop="16dp"
+        tools:ignore="NotSibling">
+
+        <!-- LinearLayout to contain ListView -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Notifications List -->
+            <ListView
+                android:id="@+id/notificationListView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@android:layout/simple_list_item_1" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

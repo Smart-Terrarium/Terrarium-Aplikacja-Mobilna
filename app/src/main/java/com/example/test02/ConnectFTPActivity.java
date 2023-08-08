@@ -1,40 +1,33 @@
 package com.example.test02;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationCompat;
-
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.SocketException;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -60,6 +53,8 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
     private Button clearButton;
     private String mAuthToken;
     private OkHttpClient client;
+    private static final int PERMISSION_REQUEST_CODE = 123;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -81,23 +76,18 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         nameEditText = findViewById(R.id.nameEditText);
         macAddressEditText = findViewById(R.id.macAddressEditText);
         addButton = findViewById(R.id.addButton);
-        clearButton = findViewById(R.id.clearButton);
 
-// Pobieramy referencję do EditText
+
+
         EditText macAddressEditText = findViewById(R.id.macAddressEditText);
 
-// Ustawiamy, że EditText nie jest focusable, co uniemożliwia edycję tekstu przez użytkownika
+
         macAddressEditText.setFocusable(false);
 
         client = new OkHttpClient();
         mAuthToken = getIntent().getStringExtra("auth_token");
         System.out.println(mAuthToken);
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearFields();
-            }
-        });
+
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +97,20 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 addNewDevice(name, macAddress);
             }
         });
+
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Użytkownik udzielił zgody, możesz kontynuować operację na plikach
+            } else {
+                // Użytkownik nie udzielił zgody, obsłuż ten przypadek
+            }
+        }
+    }
+
 
     private void addNewDevice(String name, String macAddress) {
         JSONObject jsonObject = new JSONObject();
@@ -186,7 +189,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 String jsonData = hotspotData.toString();
 
                 // Zapisz dane do pliku
-                String filePath = "/storage/emulated/0/Download/example3.txt";
+                String filePath = "/storage/emulated/0/Download/example.txt";
                 File xxx = new File(filePath);
                 if (xxx.exists()) {
                     xxx.delete();
@@ -242,16 +245,16 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
                 System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-                File outputFile = new File("/storage/emulated/0/Download/example3.txt");
+                File outputFile = new File("/storage/emulated/0/Download/example.txt");
 
                 FileOutputStream outputStream = new FileOutputStream(outputFile);
 
                 ftp.retrieveFile("/apk/example.txt", outputStream);
 
-                // Close the output stream
+
                 outputStream.close();
 
-                // Parse the downloaded JSON file and extract the mac_address
+
                 FileInputStream inputStream = new FileInputStream(outputFile);
                 byte[] buffer = new byte[inputStream.available()];
                 inputStream.read(buffer);
@@ -263,7 +266,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                     macAddress = jsonObject.getString("mac_address");
                     System.out.println("Extracted MAC Address: " + macAddress);
 
-                    // Delete the downloaded file after extracting the MAC address
+
                     outputFile.delete();
                 } else {
                     System.out.println("Downloaded JSON file is empty");
@@ -273,19 +276,19 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 ftp.disconnect();
             } catch (SocketException e) {
                 System.out.println("Błąd SocketException");
-                // Handle SocketException
+
                 e.printStackTrace();
             } catch (IOException e) {
                 System.out.println("Błąd IOException");
-                // Handle IOException
+
                 e.printStackTrace();
             } catch (JSONException e) {
                 System.out.println("Błąd JSONException");
-                // Handle JSONException
+
                 e.printStackTrace();
             } catch (Exception e) {
                 System.out.println("Inny błąd");
-                // Handle other exceptions
+
                 e.printStackTrace();
             }
             return macAddress;
@@ -293,7 +296,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
 
         @Override
         protected void onPostExecute(String macAddress) {
-            // Update the macAddressEditText field with the extracted mac_address
+
             if (macAddress != null) {
                 macAddressEditText.setText(macAddress);
                 showToast("MAC Address retrieved successfully");
@@ -303,4 +306,3 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         }
     }
 }
-
