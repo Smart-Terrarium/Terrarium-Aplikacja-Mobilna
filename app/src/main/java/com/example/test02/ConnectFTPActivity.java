@@ -53,7 +53,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
     private Button clearButton;
     private String mAuthToken;
     private OkHttpClient client;
-    private static final int PERMISSION_REQUEST_CODE = 123;
+    private MainActivity.BaseUrl baseUrlManager;
 
 
     @SuppressLint("MissingInflatedId")
@@ -65,8 +65,8 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         uploadButton = findViewById(R.id.uploadButton);
         downloadButton = findViewById(R.id.downloadButton);
         hostnameEditText = findViewById(R.id.hostnameEditText);
-        usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
+       // usernameEditText = findViewById(R.id.usernameEditText);
+       // passwordEditText = findViewById(R.id.passwordEditText);
         ssidEditText = findViewById(R.id.ssidEditText);
         passwordssidEditText = findViewById(R.id.passwordssidEditText);
 
@@ -77,7 +77,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         macAddressEditText = findViewById(R.id.macAddressEditText);
         addButton = findViewById(R.id.addButton);
 
-
+        baseUrlManager = new MainActivity.BaseUrl();
 
         EditText macAddressEditText = findViewById(R.id.macAddressEditText);
 
@@ -99,17 +99,6 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         });
 
     }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Użytkownik udzielił zgody, możesz kontynuować operację na plikach
-            } else {
-                // Użytkownik nie udzielił zgody, obsłuż ten przypadek
-            }
-        }
-    }
 
 
     private void addNewDevice(String name, String macAddress) {
@@ -124,7 +113,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
 
-        Request request = new Request.Builder().url(MainActivity.BaseUrl.BASE_URL + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
+        Request request = new Request.Builder().url(baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -189,7 +178,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 String jsonData = hotspotData.toString();
 
                 // Zapisz dane do pliku
-                String filePath = "/storage/emulated/0/Download/example.txt";
+                String filePath = "/Download/example.txt";
                 File xxx = new File(filePath);
                 if (xxx.exists()) {
                     xxx.delete();
@@ -211,7 +200,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
 
                     File file = new File(filePath);
                     FileInputStream inputStream = new FileInputStream(file);
-                    ftp.storeFile("/apk/example.txt", inputStream);
+                    ftp.storeFile("/ftp_config_file.json", inputStream);
                     inputStream.close();
 
                     System.out.println(file);
@@ -245,11 +234,11 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
                 System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-                File outputFile = new File("/storage/emulated/0/Download/example.txt");
+                File outputFile = new File("/Download/example.txt");
 
                 FileOutputStream outputStream = new FileOutputStream(outputFile);
 
-                ftp.retrieveFile("/apk/example.txt", outputStream);
+                ftp.retrieveFile("/esp_mac.json", outputStream);
 
 
                 outputStream.close();

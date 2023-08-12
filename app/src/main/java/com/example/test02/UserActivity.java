@@ -19,7 +19,7 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
     private Button button_Chart;
     private Button button_notifications;
     private Button FTPActivity;
-    private String token; // Deklaracja zmiennej token
+    private String token;
 
     public class Notification {
         @SerializedName("title")
@@ -50,10 +50,10 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
         token = getIntent().getStringExtra("auth_token"); // Przypisanie wartości do zmiennej token
         mTokenTextView.setText(token);
 
-        // odczytaj email z SharedPreferences i wyświetl go w TextView
+        // odczytaj email i wyświetl go w TextView
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", "");
-        mEmailTextView.setText("Witaj " + email);
+        mEmailTextView.setText("Welcome " + email);
 
         button_Chart = findViewById(R.id.button_chart);
         button_Chart.setOnClickListener(this);

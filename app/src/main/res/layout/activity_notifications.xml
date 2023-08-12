@@ -5,19 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Background Overlays -->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Dark Overlay with Alpha -->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.4"
             android:background="#88000000" />
 
-        <!-- Background Image -->
+
         <ImageView
             android:id="@+id/backgroundImageView"
             android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/background" />
 
-        <!-- Light Overlay -->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -33,7 +33,7 @@
 
     </RelativeLayout>
 
-    <!-- ScrollView to wrap content -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,13 +41,13 @@
         android:layout_marginTop="16dp"
         tools:ignore="NotSibling">
 
-        <!-- LinearLayout to contain ListView -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Notifications List -->
+
             <ListView
                 android:id="@+id/notificationListView"
                 android:layout_width="match_parent"

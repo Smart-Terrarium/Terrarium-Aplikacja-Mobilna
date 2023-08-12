@@ -41,9 +41,10 @@ public class NotificationsActivity extends AppCompatActivity {
     private ArrayAdapter<String> notificationAdapter;
     private ListView notificationListView;
     private String responseData;
-    private static final String BASE_URL = MainActivity.BaseUrl.BASE_URL + "/devices/alerts";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private OkHttpClient client;
+    private MainActivity.BaseUrl baseUrlManager;
+    private String BASE_URL;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -51,16 +52,16 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        // Inicjalizacja zmiennych
+        // Inicjalizacja baseUrlManager przed użyciem
+        baseUrlManager = new MainActivity.BaseUrl();
+        BASE_URL = baseUrlManager.getBaseUrl(this) + "/devices/alerts"; // Inicjalizacja BASE_URL
+
         token = getIntent().getStringExtra("auth_token");
         client = new OkHttpClient();
         notificationList = new ArrayList<>();
         notificationAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notificationList);
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
-
-        // Pobieranie powiadomień i wyświetlanie ich na liście
-        fetchNotifications();
 
         // Obsługa kliknięcia na element listy powiadomień
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,34 +71,6 @@ public class NotificationsActivity extends AppCompatActivity {
                 showNotificationDetails(position);
             }
         });
-    }
-
-    // Wyświetlanie powiadomienia systemowego
-    private void showSystemNotification(String title, String content) {
-        // Tworzenie identyfikatora kanału powiadomień (wymagane dla Androida 8.0 i nowszych)
-        String channelId = "my_channel_id";
-        String channelName = "My Channel";
-
-        // Utworzenie menedżera powiadomień
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Sprawdzenie, czy urządzenie używa Androida 8.0 lub nowszego
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Tworzenie kanału powiadomień (wymagane dla Androida 8.0 i nowszych)
-            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        // Tworzenie powiadomienia
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.background) // Ikona powiadomienia (może być zastąpiona przez odpowiednią ikonę)
-                .setContentTitle(title) // Tytuł powiadomienia
-                .setContentText(content) // Treść powiadomienia
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT) // Priorytet powiadomienia (domyślny)
-                .setAutoCancel(true); // Powiadomienie zniknie automatycznie po kliknięciu
-
-        // Wyświetlenie powiadomienia
-        notificationManager.notify(0, builder.build());
     }
 
     // Wyświetlanie szczegółów powiadomienia w oknie dialogowym
@@ -298,59 +271,4 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
 
-    // Metoda do dodawania nowego powiadomienia
-    private void addNotification() {
-        // Tutaj można zaimplementować logikę dodawania nowego powiadomienia do serwera.
-        // Wysłanie żądania POST z danymi nowego powiadomienia i odświeżenie listy powiadomień po zakończeniu.
-
-        // Przykład kodu dla żądania POST:
-        JSONObject json = new JSONObject();
-        try {
-            json.put("description", "New notification");
-            json.put("priority", 1);
-            // Dodaj inne pola związane z powiadomieniem
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        RequestBody requestBody = RequestBody.create(json.toString(), JSON);
-        Request request = new Request.Builder()
-                .url(BASE_URL)
-                .header("Authorization", "Bearer " + token)
-                .post(requestBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(NotificationsActivity.this, "Error adding notification", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(NotificationsActivity.this, "New notification added", Toast.LENGTH_SHORT).show();
-                            fetchNotifications(); // Odświeżenie listy po dodaniu
-                        }
-                    });
-                } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(NotificationsActivity.this, "Error adding notification", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }
-        });
-    }
 }

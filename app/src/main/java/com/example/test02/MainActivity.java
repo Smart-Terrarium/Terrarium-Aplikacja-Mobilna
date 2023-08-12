@@ -1,11 +1,11 @@
 package com.example.test02;
 
-import static com.example.test02.MainActivity.BaseUrl.BASE_URL;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,20 +41,27 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTokenTextView;
     private TextView mEmailTextView;
     private EditText mBaseUrlEditText;
+    private BaseUrl baseUrlManager;
 
 
-    public class BaseUrl {
-        public static final String BASE_URL = "http://10.0.2.2:8000";
+    public static class BaseUrl {
+        private String baseUrl = "http://10.0.2.2:8000"; // Default value
+
+        public String getBaseUrl(Context context) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
+            return sharedPreferences.getString("baseUrl", baseUrl);
+        }
+
+        public void setBaseUrl(Context context, String newBaseUrl) {
+            baseUrl = newBaseUrl;
+
+            SharedPreferences.Editor editor = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE).edit();
+            editor.putString("baseUrl", newBaseUrl);
+            editor.apply();
+        }
     }
-    private static String BASE_URL = "http://10.0.2.2:8000";
 
-    public static String getBaseUrl() {
-        return BASE_URL;
-    }
 
-    public static void setBaseUrl(String baseUrl) {
-        BASE_URL = baseUrl;
-    }
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +126,15 @@ public class MainActivity extends AppCompatActivity {
             }
             new RegisterTask().execute(json);
         });
+
+        Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
+        forgotPasswordButton.setOnClickListener(v -> {
+            // Otwarcie nowej aktywności PasswordActivity
+            Intent intent = new Intent(MainActivity.this, PasswordActivity.class);
+            startActivity(intent);
+        });
+
+        baseUrlManager = new BaseUrl();
     }
 
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
@@ -130,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
             JSONObject json = params[0];
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
-            String baseUrl = MainActivity.getBaseUrl();
+            String baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
             if (baseUrl.isEmpty()) {
-                baseUrl = BASE_URL;
+                baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
             }
 
 
@@ -196,9 +212,9 @@ public class MainActivity extends AppCompatActivity {
             JSONObject json = params[0];
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
-            String baseUrl = MainActivity.getBaseUrl();
+            String baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
             if (baseUrl.isEmpty()) {
-                baseUrl = BASE_URL;
+                baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
             }
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {

@@ -27,16 +27,18 @@ import java.net.URL;
 public class BackgroundNotificationService extends Service {
 
     private String token;
+    private MainActivity.BaseUrl baseUrlManager;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             token = intent.getStringExtra("auth_token");
         } else {
-            stopSelf(); // Zakończ usługę
+            stopSelf();
             return START_NOT_STICKY;
         }
 
+        baseUrlManager = new MainActivity.BaseUrl();
 
         new Thread(new Runnable() {
             public void run() {
@@ -49,7 +51,7 @@ public class BackgroundNotificationService extends Service {
 
     private void startSSEConnection() {
         try {
-            URL url = new URL("http://10.0.2.2:8000/devices/notifier/alerts");
+            URL url = new URL("http://" + baseUrlManager.getBaseUrl(this) + "/devices/notifier/alerts");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Authorization", "Bearer " + token);

@@ -58,6 +58,8 @@ public class ChartActivity extends AppCompatActivity {
     private List<String> deviceNames = new ArrayList<>();
     private List<String> sensorNames = new ArrayList<>();
     private String selectedDevice;
+    private MainActivity.BaseUrl baseUrlManager;
+    private String BASE_URL;
 
     class Sensor {
         private final String pin_number;
@@ -106,11 +108,17 @@ public class ChartActivity extends AppCompatActivity {
     private List<String> deviceIds = new ArrayList<>();
 
     private void getListDeviceIds(String token) {
-        Request request = new Request.Builder().url(MainActivity.BaseUrl.BASE_URL + "/devices").header("Authorization", "Bearer " + token).build();
+        String baseUrl = baseUrlManager.getBaseUrl(this);
+        if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            baseUrl = "http://" + baseUrl;
+        }
+
+        Request request = new Request.Builder().url(baseUrl + "/devices").header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
 
         client.newCall(request).enqueue(new Callback() {
+
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -126,7 +134,7 @@ public class ChartActivity extends AppCompatActivity {
                             responseJson = new JSONArray(responseBody);
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject deviceJson = responseJson.getJSONObject(i);
-                                int deviceId = deviceJson.getInt("id");
+                                int deviceId = deviceJson.getInt("pin_number");
                                 String deviceName = deviceJson.getString("mac_address");
                                 deviceNames.add(deviceName);
                                 deviceIds.add(String.valueOf(deviceId));
@@ -158,7 +166,13 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     private void getListSensorIds(String token, String selectedDevice) {
-        String url = MainActivity.BaseUrl.BASE_URL + "/device/" + selectedDevice;
+
+        String baseUrl = baseUrlManager.getBaseUrl(this);
+        if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            baseUrl = "http://" + baseUrl;
+        }
+
+        String url = baseUrl + "/device/" + selectedDevice;
         Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
@@ -180,7 +194,7 @@ public class ChartActivity extends AppCompatActivity {
                             sensorNames.clear();
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject sensorJson = responseJson.getJSONObject(i);
-                                String sensorName = sensorJson.getString("pin_number");
+                                String sensorName = sensorJson.getString("id");
                                 sensorNames.add(sensorName);
                             }
 
@@ -242,6 +256,7 @@ public class ChartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
+        baseUrlManager = new MainActivity.BaseUrl();
         lineChart = findViewById(R.id.lineChart);
         deviceSpinner = findViewById(R.id.deviceSpinner);
         sensorSpinner = findViewById(R.id.sensorSpinner);
@@ -296,7 +311,9 @@ public class ChartActivity extends AppCompatActivity {
     private void createWebSocketClient() {
         URI uri;
         try {
-            uri = new URI(MainActivity.BaseUrl.BASE_URL + "/device/1/sensor/data");
+            uri = new URI(baseUrlManager.getBaseUrl(this) + "/device/1/sensor/data");
+            //uri = new URI(  "ws://192.168.88.251:8000/device/1/sensor/data");
+
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;

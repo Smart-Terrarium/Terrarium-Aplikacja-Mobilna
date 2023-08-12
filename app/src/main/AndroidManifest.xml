@@ -84,6 +84,8 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity android:name=".PasswordActivity"
+            tools:ignore="Instantiatable" />
         <service
             android:name=".BackgroundNotificationService"
             android:exported="false" />
