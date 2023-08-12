@@ -37,7 +37,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class ConnectFTPActivity extends UserActivity implements OnClickListener {
+public class ConnectFTPActivity extends UserActivity implements View.OnClickListener {
 
     private Button uploadButton;
     private Button downloadButton;
@@ -55,7 +55,6 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
     private OkHttpClient client;
     private MainActivity.BaseUrl baseUrlManager;
 
-
     @SuppressLint("MissingInflatedId")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,22 +62,13 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         setContentView(R.layout.activity_file_transfer);
 
         hostnameEditText = findViewById(R.id.hostnameEditText);
-        //usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
+        //usernameEditText = findViewById(R.id.usernameEditText); // Add reference to the username EditText
+        // passwordEditText = findViewById(R.id.passwordEditText);
 
         uploadButton = findViewById(R.id.uploadButton);
         downloadButton = findViewById(R.id.downloadButton);
-        hostnameEditText = findViewById(R.id.hostnameEditText);
-       // usernameEditText = findViewById(R.id.usernameEditText);
-       // passwordEditText = findViewById(R.id.passwordEditText);
         ssidEditText = findViewById(R.id.ssidEditText);
         passwordssidEditText = findViewById(R.id.passwordssidEditText);
-
-        hostnameEditText = findViewById(R.id.hostnameEditText);
-        //usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        uploadButton.setOnClickListener(this);
-        downloadButton.setOnClickListener(this);
 
         nameEditText = findViewById(R.id.nameEditText);
         macAddressEditText = findViewById(R.id.macAddressEditText);
@@ -86,15 +76,10 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
 
         baseUrlManager = new MainActivity.BaseUrl();
 
-        EditText macAddressEditText = findViewById(R.id.macAddressEditText);
-
-
         macAddressEditText.setFocusable(false);
 
         client = new OkHttpClient();
         mAuthToken = getIntent().getStringExtra("auth_token");
-        System.out.println(mAuthToken);
-
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,8 +90,9 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
             }
         });
 
+        uploadButton.setOnClickListener(this);
+        downloadButton.setOnClickListener(this);
     }
-
 
     private void addNewDevice(String name, String macAddress) {
         JSONObject jsonObject = new JSONObject();
@@ -120,7 +106,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
 
-        Request request = new Request.Builder().url("http:/" + baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
+        Request request = new Request.Builder().url("http://" + baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -141,11 +127,6 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         });
     }
 
-    private void clearFields() {
-        nameEditText.setText("");
-        macAddressEditText.setText("");
-    }
-
     private void showToast(final String message) {
         runOnUiThread(new Runnable() {
             @Override
@@ -164,16 +145,15 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
             case R.id.downloadButton:
                 new DownloadTask().execute();
                 break;
-
         }
     }
 
-    private class UploadTask extends AsyncTask<Void, Void, Void> {
+    private class UploadTask extends AsyncTask<Void, Void, Boolean> {
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Boolean doInBackground(Void... params) {
             String hostname = hostnameEditText.getText().toString();
-            // String username = usernameEditText.getText().toString(); // Commented out
-          //  String password = passwordEditText.getText().toString();
+            String username = "";
+            String password = "";
 
             String ssid = ssidEditText.getText().toString();
             String passwordssid = passwordssidEditText.getText().toString();
@@ -202,6 +182,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 FTPClient ftp = new FTPClient();
                 try {
                     ftp.connect(hostname);
+                    ftp.login(username, password);
                     ftp.enterLocalPassiveMode();
 
                     ftp.setFileType(FTP.BINARY_FILE_TYPE);
@@ -214,15 +195,29 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                     System.out.println(file);
                     ftp.logout();
                     ftp.disconnect();
+                    return true; // Zwraca true w przypadku pomyślnego przesyłania pliku
+
                 } catch (SocketException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return false; // Zwraca false w przypadku błędu
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean uploadSuccess) {
+            super.onPostExecute(uploadSuccess);
+            if (uploadSuccess) {
+                showToast("File uploaded successfully");
+            } else {
+                showToast("File upload failed");
+            }
         }
     }
 
@@ -230,13 +225,14 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         @Override
         protected String doInBackground(Void... params) {
             String hostname = hostnameEditText.getText().toString();
-           // String username = usernameEditText.getText().toString();
-            //String password = passwordEditText.getText().toString();
+            String username = "";
+            String password = "";
 
             FTPClient ftp = new FTPClient();
             String macAddress = null;
             try {
                 ftp.connect(hostname);
+                ftp.login(username, password);
                 ftp.enterLocalPassiveMode();
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
@@ -247,9 +243,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
 
                 ftp.retrieveFile("/esp_mac.json", outputStream);
 
-
                 outputStream.close();
-
 
                 FileInputStream inputStream = new FileInputStream(outputFile);
                 byte[] buffer = new byte[inputStream.available()];
@@ -261,7 +255,6 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                     JSONObject jsonObject = new JSONObject(jsonData);
                     macAddress = jsonObject.getString("mac_address");
                     System.out.println("Extracted MAC Address: " + macAddress);
-
 
                     outputFile.delete();
                 } else {
@@ -292,7 +285,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
 
         @Override
         protected void onPostExecute(String macAddress) {
-
+            super.onPostExecute(macAddress);
             if (macAddress != null) {
                 macAddressEditText.setText(macAddress);
                 showToast("MAC Address retrieved successfully");
