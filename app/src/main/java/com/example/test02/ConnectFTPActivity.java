@@ -74,6 +74,9 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         ssidEditText = findViewById(R.id.ssidEditText);
         passwordssidEditText = findViewById(R.id.passwordssidEditText);
 
+        hostnameEditText = findViewById(R.id.hostnameEditText);
+        //usernameEditText = findViewById(R.id.usernameEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
         uploadButton.setOnClickListener(this);
         downloadButton.setOnClickListener(this);
 
@@ -169,8 +172,9 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         @Override
         protected Void doInBackground(Void... params) {
             String hostname = hostnameEditText.getText().toString();
-            String username = usernameEditText.getText().toString();
-            String password = passwordEditText.getText().toString();
+            // String username = usernameEditText.getText().toString(); // Commented out
+          //  String password = passwordEditText.getText().toString();
+
             String ssid = ssidEditText.getText().toString();
             String passwordssid = passwordssidEditText.getText().toString();
 
@@ -199,7 +203,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
                 try {
                     ftp.connect(hostname);
                     ftp.enterLocalPassiveMode();
-                    ftp.login(username, password);
+
                     ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
                     File file = new File(filePath);
@@ -226,15 +230,14 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         @Override
         protected String doInBackground(Void... params) {
             String hostname = hostnameEditText.getText().toString();
-            String username = usernameEditText.getText().toString();
-            String password = passwordEditText.getText().toString();
+           // String username = usernameEditText.getText().toString();
+            //String password = passwordEditText.getText().toString();
 
             FTPClient ftp = new FTPClient();
             String macAddress = null;
             try {
                 ftp.connect(hostname);
                 ftp.enterLocalPassiveMode();
-                ftp.login(username, password);
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
                 System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
