@@ -62,6 +62,10 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_transfer);
 
+        hostnameEditText = findViewById(R.id.hostnameEditText);
+        //usernameEditText = findViewById(R.id.usernameEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+
         uploadButton = findViewById(R.id.uploadButton);
         downloadButton = findViewById(R.id.downloadButton);
         hostnameEditText = findViewById(R.id.hostnameEditText);
@@ -113,7 +117,7 @@ public class ConnectFTPActivity extends UserActivity implements OnClickListener 
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
 
-        Request request = new Request.Builder().url(baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
+        Request request = new Request.Builder().url("http:/" + baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken) // Dodaj autoryzację
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
