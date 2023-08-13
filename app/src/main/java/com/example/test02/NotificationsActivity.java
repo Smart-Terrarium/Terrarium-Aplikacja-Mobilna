@@ -2,12 +2,9 @@ package com.example.test02;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,7 +13,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +42,10 @@ public class NotificationsActivity extends AppCompatActivity {
     private MainActivity.BaseUrl baseUrlManager;
     private String BASE_URL;
 
+    // Filtry
+    private boolean sortByPriority = true;
+    private boolean onlyServed = false;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +63,7 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
         fetchNotifications();
+
         // Obsługa kliknięcia na element listy powiadomień
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,9 +71,45 @@ public class NotificationsActivity extends AppCompatActivity {
                 // Wywołanie funkcji do wyświetlenia szczegółów powiadomienia w oknie dialogowym
                 showNotificationDetails(position);
             }
+        });
 
+        findViewById(R.id.resetListButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetNotificationList();
+            }
+        });
+
+        findViewById(R.id.onlyServedToggle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOnlyServedToggle(v);
+            }
         });
     }
+    private void resetNotificationList() {
+        // Wyzeruj filtry i odśwież listę
+        sortByPriority = true;
+        onlyServed = false;
+        applyFilters();
+    }
+    // Metoda do ustawiania filtrów i odświeżania listy
+    private void applyFilters() {
+        fetchNotifications();
+    }
+
+    // Obsługa kliknięcia przycisku sortowania po priorytecie
+    public void onSortByPriorityToggle(View view) {
+        sortByPriority = !sortByPriority;
+        applyFilters();
+    }
+
+    // Obsługa kliknięcia przycisku filtrowania pokazującego tylko obsłużone
+    public void onOnlyServedToggle(View view) {
+        onlyServed = !onlyServed;
+        applyFilters();
+    }
+
 
     // Wyświetlanie szczegółów powiadomienia w oknie dialogowym
     private void showNotificationDetails(int position) {
@@ -167,7 +204,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "http://" +  BASE_URL + notificationID;
+        String url = "http://" +  BASE_URL + "/" + notificationID;
 
         // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
@@ -221,8 +258,10 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do pobierania powiadomień z serwera
     private void fetchNotifications() {
-        String url = "http://" + BASE_URL + "?sort_by_priority=true&only_served=false";
-        System.out.println(BASE_URL + " base");
+        String url = "http://" + BASE_URL +
+                "?sort_by_priority=" + sortByPriority +
+                "&only_served=" + onlyServed;
+
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer " + token)
@@ -272,6 +311,4 @@ public class NotificationsActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-}
+    }}

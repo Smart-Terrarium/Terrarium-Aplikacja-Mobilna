@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
     <RelativeLayout
@@ -17,7 +17,25 @@
             android:alpha="0.4"
             android:background="#88000000" />
 
+        <Button
+            android:id="@+id/resetListButton"
+            style="@style/ButtonStyle"
+            android:layout_width="198dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#E6FFFFFF"
+            android:text="NOTIFICATIONS" />
 
+        <Button
+            android:id="@+id/onlyServedToggle"
+            style="@style/ButtonStyle"
+            android:layout_width="246dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="200dp"
+            android:backgroundTint="#E6FFFFFF"
+            android:text="Only Served"
+            app:layout_constraintTop_toBottomOf="@id/resetListButton" />
         <ImageView
             android:id="@+id/backgroundImageView"
             android:layout_width="match_parent"
@@ -38,8 +56,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/backgroundImageView"
-        android:layout_marginTop="16dp"
-        tools:ignore="NotSibling">
+        android:layout_marginTop="66dp"
+        tools:ignore="NotSibling"
+        app:layout_constraintTop_toBottomOf="@id/onlyServedToggle">
 
 
         <LinearLayout
@@ -51,7 +70,7 @@
             <ListView
                 android:id="@+id/notificationListView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="494dp"
                 tools:listitem="@android:layout/simple_list_item_1" />
 
         </LinearLayout>
