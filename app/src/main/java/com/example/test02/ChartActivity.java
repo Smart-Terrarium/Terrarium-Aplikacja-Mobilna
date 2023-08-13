@@ -59,7 +59,8 @@ public class ChartActivity extends AppCompatActivity {
     private List<String> sensorNames = new ArrayList<>();
     private String selectedDevice;
     private MainActivity.BaseUrl baseUrlManager;
-    private String BASE_URL;
+    private String BaseUrl;
+
 
     class Sensor {
         private final String pin_number;
@@ -134,7 +135,7 @@ public class ChartActivity extends AppCompatActivity {
                             responseJson = new JSONArray(responseBody);
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject deviceJson = responseJson.getJSONObject(i);
-                                int deviceId = deviceJson.getInt("pin_number");
+                                int deviceId = deviceJson.getInt("id");
                                 String deviceName = deviceJson.getString("mac_address");
                                 deviceNames.add(deviceName);
                                 deviceIds.add(String.valueOf(deviceId));
@@ -194,7 +195,7 @@ public class ChartActivity extends AppCompatActivity {
                             sensorNames.clear();
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject sensorJson = responseJson.getJSONObject(i);
-                                String sensorName = sensorJson.getString("id");
+                                String sensorName = sensorJson.getString("pin_number");
                                 sensorNames.add(sensorName);
                             }
 
@@ -256,14 +257,15 @@ public class ChartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
-        baseUrlManager = new MainActivity.BaseUrl();
         lineChart = findViewById(R.id.lineChart);
         deviceSpinner = findViewById(R.id.deviceSpinner);
         sensorSpinner = findViewById(R.id.sensorSpinner);
         mAuthToken = getIntent().getStringExtra("auth_token");
-
+        baseUrlManager = new MainActivity.BaseUrl();
+        System.out.println(baseUrlManager + "eeeeeeeee");
         getListDeviceIds(mAuthToken);
         createWebSocketClient();
+
 
         deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

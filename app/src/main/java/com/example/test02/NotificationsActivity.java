@@ -62,7 +62,7 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notificationList);
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
-
+        fetchNotifications();
         // Obsługa kliknięcia na element listy powiadomień
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,6 +70,7 @@ public class NotificationsActivity extends AppCompatActivity {
                 // Wywołanie funkcji do wyświetlenia szczegółów powiadomienia w oknie dialogowym
                 showNotificationDetails(position);
             }
+
         });
     }
 
@@ -122,7 +123,8 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do usuwania powiadomienia o podanym ID
     private void deleteNotification(String notificationId) {
-        String url = BASE_URL + "/" + notificationId;
+        String url = "http://" +  BASE_URL + notificationId;
+
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer " + token)
@@ -165,7 +167,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = BASE_URL + "/" + notificationID;
+        String url = "http://" +  BASE_URL + notificationID;
 
         // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
@@ -219,7 +221,8 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do pobierania powiadomień z serwera
     private void fetchNotifications() {
-        String url = BASE_URL + "?sort_by_priority=true&only_served=false";
+        String url = "http://" + BASE_URL + "?sort_by_priority=true&only_served=false";
+        System.out.println(BASE_URL + " base");
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer " + token)
