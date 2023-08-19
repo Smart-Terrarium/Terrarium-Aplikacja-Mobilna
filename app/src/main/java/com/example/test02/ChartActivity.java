@@ -145,7 +145,7 @@ public class ChartActivity extends AppCompatActivity {
     private void getListDeviceIds(String token) {
         String baseUrl = baseUrlManager.getBaseUrl(this);
         if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-            baseUrl = "https://" + baseUrl;
+            baseUrl = "http://" + baseUrl;
         }
 
         Request request = new Request.Builder().url(baseUrl + "/devices").header("Authorization", "Bearer " + token).build();
@@ -204,7 +204,7 @@ public class ChartActivity extends AppCompatActivity {
 
         String baseUrl = baseUrlManager.getBaseUrl(this);
         if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-            baseUrl = "https://" + baseUrl;
+            baseUrl = "http://" + baseUrl;
         }
 
         String url = baseUrl + "/device/" + selectedDevice;

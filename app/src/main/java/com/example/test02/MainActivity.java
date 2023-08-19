@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static class BaseUrl {
-        private String baseUrl = "https://10.0.2.2:8000";
+        private String baseUrl = "http://10.0.2.2:8000";
 
         public String getBaseUrl(Context context) {
             SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-                baseUrl = "https://" + baseUrl;
+                baseUrl = "http://" + baseUrl;
             }
 
             Request request = new Request.Builder()
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-                baseUrl = "https://" + baseUrl;
+                baseUrl = "http://" + baseUrl;
             }
             System.out.println(baseUrl);
             Request request = new Request.Builder()

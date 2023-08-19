@@ -190,7 +190,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do usuwania powiadomienia o podanym ID
     private void deleteNotification(String notificationId) {
-        String url = "https://" +  BASE_URL + notificationId;
+        String url = "http://" +  BASE_URL + notificationId;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -234,7 +234,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "https://" +  BASE_URL + "/" + notificationID;
+        String url = "http://" +  BASE_URL + "/" + notificationID;
 
         // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
@@ -288,7 +288,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do pobierania powiadomień z serwera
     private void fetchNotifications() {
-        String url = "https://" + BASE_URL +
+        String url = "http://" + BASE_URL +
                 "?sort_by_priority=" + sortByPriority +
                 "&only_served=" + onlyServed;
 
