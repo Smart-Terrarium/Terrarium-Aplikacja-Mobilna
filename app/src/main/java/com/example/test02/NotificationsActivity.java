@@ -2,7 +2,6 @@ package com.example.test02;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -19,8 +18,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -38,7 +44,7 @@ public class NotificationsActivity extends AppCompatActivity {
     private ListView notificationListView;
     private String responseData;
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private OkHttpClient client;
+    private OkHttpClient mHttpClient;
     private MainActivity.BaseUrl baseUrlManager;
     private String BASE_URL;
 
@@ -46,29 +52,34 @@ public class NotificationsActivity extends AppCompatActivity {
     private boolean sortByPriority = true;
     private boolean onlyServed = false;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
-        // Inicjalizacja baseUrlManager przed użyciem
         baseUrlManager = new MainActivity.BaseUrl();
-        BASE_URL = baseUrlManager.getBaseUrl(this) + "/devices/alerts"; // Inicjalizacja BASE_URL
+        BASE_URL = baseUrlManager.getBaseUrl(this) + "/devices/alerts";
 
         token = getIntent().getStringExtra("auth_token");
-        client = new OkHttpClient();
         notificationList = new ArrayList<>();
         notificationAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notificationList);
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
+
+        // Wyłączanie sprawdzania poprawności certyfikatu
+        try {
+            trustAllCertificates();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Wywołanie fetchNotifications() PO trustAllCertificates()
         fetchNotifications();
 
         // Obsługa kliknięcia na element listy powiadomień
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Wywołanie funkcji do wyświetlenia szczegółów powiadomienia w oknie dialogowym
                 showNotificationDetails(position);
             }
         });
@@ -86,6 +97,25 @@ public class NotificationsActivity extends AppCompatActivity {
                 onOnlyServedToggle(v);
             }
         });
+    }
+
+    private void trustAllCertificates() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new SecureRandom());
+        mHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager)trustAllCerts[0])
+                .hostnameVerifier((hostname, session) -> true)
+                .build();
     }
     private void resetNotificationList() {
         // Wyzeruj filtry i odśwież listę
@@ -160,7 +190,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do usuwania powiadomienia o podanym ID
     private void deleteNotification(String notificationId) {
-        String url = "http://" +  BASE_URL + notificationId;
+        String url = "https://" +  BASE_URL + notificationId;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -168,7 +198,7 @@ public class NotificationsActivity extends AppCompatActivity {
                 .delete()
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
+        mHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -204,7 +234,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "http://" +  BASE_URL + "/" + notificationID;
+        String url = "https://" +  BASE_URL + "/" + notificationID;
 
         // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
@@ -222,7 +252,7 @@ public class NotificationsActivity extends AppCompatActivity {
                 .put(requestBody)
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
+        mHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -258,7 +288,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do pobierania powiadomień z serwera
     private void fetchNotifications() {
-        String url = "http://" + BASE_URL +
+        String url = "https://" + BASE_URL +
                 "?sort_by_priority=" + sortByPriority +
                 "&only_served=" + onlyServed;
 
@@ -267,7 +297,7 @@ public class NotificationsActivity extends AppCompatActivity {
                 .header("Authorization", "Bearer " + token)
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
+        mHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();

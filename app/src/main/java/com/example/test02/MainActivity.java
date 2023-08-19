@@ -21,12 +21,21 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static class BaseUrl {
-        private String baseUrl = "http://10.0.2.2:8000"; // Default value
+        private String baseUrl = "https://10.0.2.2:8000";
 
         public String getBaseUrl(Context context) {
             SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
@@ -85,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
 
         mHttpClient = new OkHttpClient();
 
+        try {
+            trustAllCertificates();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         @SuppressLint("WrongViewCast")
 
         ImageButton UrlActivityButton = findViewById(R.id.settingsButton);
@@ -136,7 +150,24 @@ public class MainActivity extends AppCompatActivity {
 
         baseUrlManager = new BaseUrl();
     }
+    private void trustAllCertificates() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
+                }
+        };
 
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new SecureRandom());
+        mHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager)trustAllCerts[0])
+                .hostnameVerifier((hostname, session) -> true)
+                .build();
+    }
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
         @Override
         protected Boolean doInBackground(JSONObject... params) {
@@ -153,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-                baseUrl = "http://" + baseUrl;
+                baseUrl = "https://" + baseUrl;
             }
 
             Request request = new Request.Builder()
@@ -218,8 +249,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-                baseUrl = "http://" + baseUrl;
+                baseUrl = "https://" + baseUrl;
             }
+            System.out.println(baseUrl);
             Request request = new Request.Builder()
                     .url(baseUrl + "/register")
                     .post(formBody)

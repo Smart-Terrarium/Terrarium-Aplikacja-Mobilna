@@ -27,12 +27,19 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -60,6 +67,31 @@ public class ChartActivity extends AppCompatActivity {
     private String selectedDevice;
     private MainActivity.BaseUrl baseUrlManager;
     private String BaseUrl;
+
+    private void trustAllCertificates() throws Exception {
+        TrustManager[] trustAllCertificates = new TrustManager[]{
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+                }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCertificates, new SecureRandom());
+
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCertificates[0])
+                .hostnameVerifier((hostname, session) -> true);
+
+        OkHttpClient client = builder.build();
+    }
 
 
     class Sensor {
@@ -106,12 +138,14 @@ public class ChartActivity extends AppCompatActivity {
         }
     }
 
+
+
     private List<String> deviceIds = new ArrayList<>();
 
     private void getListDeviceIds(String token) {
         String baseUrl = baseUrlManager.getBaseUrl(this);
         if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-            baseUrl = "http://" + baseUrl;
+            baseUrl = "https://" + baseUrl;
         }
 
         Request request = new Request.Builder().url(baseUrl + "/devices").header("Authorization", "Bearer " + token).build();
@@ -170,7 +204,7 @@ public class ChartActivity extends AppCompatActivity {
 
         String baseUrl = baseUrlManager.getBaseUrl(this);
         if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-            baseUrl = "http://" + baseUrl;
+            baseUrl = "https://" + baseUrl;
         }
 
         String url = baseUrl + "/device/" + selectedDevice;
@@ -253,9 +287,15 @@ public class ChartActivity extends AppCompatActivity {
         lineChart.getXAxis().setPosition(XAxis.XAxisPosition.TOP);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            trustAllCertificates(); // Call the method to disable certificate validation
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setContentView(R.layout.activity_chart);
         lineChart = findViewById(R.id.lineChart);
         deviceSpinner = findViewById(R.id.deviceSpinner);
