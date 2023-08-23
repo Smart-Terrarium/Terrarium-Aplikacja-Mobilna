@@ -56,39 +56,16 @@ public class BackgroundNotificationService extends Service {
 
         return START_STICKY;
     }
-    private void trustAllCertificates() throws Exception {
-        TrustManager[] trustAllCertificates = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
 
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustAllCertificates, new SecureRandom());
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCertificates[0])
-                .hostnameVerifier((hostname, session) -> true);
-
-        OkHttpClient client = builder.build();
-    }
     private void startSSEConnection() {
         try {
-            URL url = new URL("http://" + baseUrlManager.getBaseUrl(this) + "/devices/notifier/alerts");
+            URL url = new URL("http://" + baseUrlManager.getBaseUrl(this) + ":8000/devices/notifier/alerts");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Authorization", "Bearer " + token);
             connection.setRequestProperty("Accept", "text/event-stream");
             System.out.println(token + "TTTTTTTTTTTTTT");
-            trustAllCertificates();
+
 
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
