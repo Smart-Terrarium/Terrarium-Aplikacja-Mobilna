@@ -94,11 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         mHttpClient = new OkHttpClient();
 
-        try {
-            trustAllCertificates();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         @SuppressLint("WrongViewCast")
 
         ImageButton UrlActivityButton = findViewById(R.id.settingsButton);
@@ -188,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Request request = new Request.Builder()
-                    .url(baseUrl + "/login")
+                    .url(baseUrl + ":8000/login")
                     .post(formBody)
                     .build();
 
@@ -253,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             }
             System.out.println(baseUrl);
             Request request = new Request.Builder()
-                    .url(baseUrl + "/register")
+                    .url(baseUrl + ":8000/register")
                     .post(formBody)
                     .build();
 

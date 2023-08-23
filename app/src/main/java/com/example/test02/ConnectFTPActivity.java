@@ -37,9 +37,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 import android.content.Context;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.HashMap;
 
 public class ConnectFTPActivity extends AppCompatActivity implements View.OnClickListener {
@@ -112,8 +115,8 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(mediaType, jsonObject.toString());
 
-        Request request = new Request.Builder().url("http://" + baseUrlManager.getBaseUrl(this) + "/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken)
-                .build();
+        Request request = new Request.Builder().url("http://" + baseUrlManager.getBaseUrl(this) +
+                ":8000/device").post(requestBody).header("Authorization", "Bearer " + mAuthToken).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -165,7 +168,6 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
             String passwordssid = passwordssidEditText.getText().toString();
 
 
-
             JSONObject hotspotData = new JSONObject();
             try {
                 hotspotData.put("TCP_SERVER_IP", baseUrlManager.getBaseUrl(ConnectFTPActivity.this));
@@ -178,7 +180,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
                 String jsonData = hotspotData.toString();
 
                 // Zapisz dane do pliku
-                String filePath = "/Download/example.txt";
+                @SuppressLint("SdCardPath") String filePath = "/sdcard/Download/example.txt";
                 File xxx = new File(filePath);
                 if (xxx.exists()) {
                     xxx.delete();
@@ -249,7 +251,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
                 ftp.setFileType(FTP.BINARY_FILE_TYPE);
 
                 System.out.println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
-                File outputFile = new File("/Download/example.txt");
+                @SuppressLint("SdCardPath") File outputFile = new File("/sdcard/Download/example.txt");
 
                 FileOutputStream outputStream = new FileOutputStream(outputFile);
 

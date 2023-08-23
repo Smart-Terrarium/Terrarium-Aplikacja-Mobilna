@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Projekt Terrarium aplikacja mobilna</string>
+    <string name="app_name">Smart Terrarium</string>
     <string name="token">Token:</string>
     <string name="weight_label" />
     <string name="height_label" />

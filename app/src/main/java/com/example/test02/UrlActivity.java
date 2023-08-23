@@ -40,9 +40,9 @@ public class UrlActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String baseUrl = mBaseUrlEditText.getText().toString();
                 if (!baseUrl.isEmpty()) {
-                    baseUrlManager.setBaseUrl(UrlActivity.this, baseUrl); // Use instance method
+                    baseUrlManager.setBaseUrl(UrlActivity.this, baseUrl);
 
-                    mCurrentUrlTextView.setText("Aktualny zapisany adres: " + baseUrl);
+                    mCurrentUrlTextView.setText("Current address: " + baseUrl);
                 }
             }
         });

@@ -57,8 +57,10 @@ public class NotificationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
+        mHttpClient = new OkHttpClient();
+
         baseUrlManager = new MainActivity.BaseUrl();
-        BASE_URL = baseUrlManager.getBaseUrl(this) + "/devices/alerts";
+        BASE_URL = baseUrlManager.getBaseUrl(this) + ":8000/devices/alerts";
 
         token = getIntent().getStringExtra("auth_token");
         notificationList = new ArrayList<>();
@@ -66,12 +68,7 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
 
-        // Wyłączanie sprawdzania poprawności certyfikatu
-        try {
-            trustAllCertificates();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
         // Wywołanie fetchNotifications() PO trustAllCertificates()
         fetchNotifications();
@@ -99,40 +96,19 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
 
-    private void trustAllCertificates() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
-                }
-        };
 
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustAllCerts, new SecureRandom());
-        mHttpClient = new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager)trustAllCerts[0])
-                .hostnameVerifier((hostname, session) -> true)
-                .build();
-    }
     private void resetNotificationList() {
         // Wyzeruj filtry i odśwież listę
         sortByPriority = true;
         onlyServed = false;
         applyFilters();
     }
+
     // Metoda do ustawiania filtrów i odświeżania listy
     private void applyFilters() {
         fetchNotifications();
     }
 
-    // Obsługa kliknięcia przycisku sortowania po priorytecie
-    public void onSortByPriorityToggle(View view) {
-        sortByPriority = !sortByPriority;
-        applyFilters();
-    }
 
     // Obsługa kliknięcia przycisku filtrowania pokazującego tylko obsłużone
     public void onOnlyServedToggle(View view) {
@@ -234,7 +210,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "http://" +  BASE_URL + "/" + notificationID;
+        String url = "http://" +  BASE_URL + notificationID;
 
         // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
@@ -291,7 +267,6 @@ public class NotificationsActivity extends AppCompatActivity {
         String url = "http://" + BASE_URL +
                 "?sort_by_priority=" + sortByPriority +
                 "&only_served=" + onlyServed;
-
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer " + token)

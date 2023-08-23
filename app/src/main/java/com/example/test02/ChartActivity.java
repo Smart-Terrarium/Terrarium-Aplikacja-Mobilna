@@ -148,7 +148,7 @@ public class ChartActivity extends AppCompatActivity {
             baseUrl = "http://" + baseUrl;
         }
 
-        Request request = new Request.Builder().url(baseUrl + "/devices").header("Authorization", "Bearer " + token).build();
+        Request request = new Request.Builder().url(baseUrl + ":8000/devices").header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
 
@@ -207,7 +207,7 @@ public class ChartActivity extends AppCompatActivity {
             baseUrl = "http://" + baseUrl;
         }
 
-        String url = baseUrl + "/device/" + selectedDevice;
+        String url = baseUrl + ":8000/device/" + selectedDevice;
         Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + token).build();
 
         OkHttpClient client = new OkHttpClient();
@@ -353,9 +353,9 @@ public class ChartActivity extends AppCompatActivity {
     private void createWebSocketClient() {
         URI uri;
         try {
-            uri = new URI(baseUrlManager.getBaseUrl(this) + "/device/1/sensor/data");
-            //uri = new URI(  "ws://192.168.88.251:8000/device/1/sensor/data");
-
+            //uri = new URI(baseUrlManager.getBaseUrl(this) + ":8000/device/1/sensor/data");
+            uri = new URI(  "ws://192.168.88.252:8000/device/1/sensor/data");
+            System.out.println(uri+"adresss90909090");
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;
