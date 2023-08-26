@@ -20,22 +20,9 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
     private Button button_notifications;
     private Button FTPActivity;
     private String token;
+    private Button button_Settings;
 
-    public class Notification {
-        @SerializedName("title")
-        private String title;
 
-        @SerializedName("description")
-        private String description;
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
     @SuppressLint("MissingInflatedId")
 
     @Override
@@ -64,6 +51,11 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
         FTPActivity = findViewById(R.id.button_FTPActivity);
         FTPActivity.setOnClickListener(this);
 
+        button_Settings = findViewById(R.id.button_Settings);
+        button_Settings.setOnClickListener(this);
+
+
+
         Intent serviceIntent = new Intent(this, BackgroundNotificationService.class);
         serviceIntent.putExtra("auth_token", token);
         startService(serviceIntent);
@@ -85,6 +77,11 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
                 Intent deviceIntentFTPActivity = new Intent(this, ConnectFTPActivity.class);
                 deviceIntentFTPActivity.putExtra("auth_token", token);
                 startActivity(deviceIntentFTPActivity);
+                break;
+            case R.id.button_Settings:
+                Intent button_Settings = new Intent(this, SettingsActivity.class);
+                button_Settings.putExtra("auth_token", token);
+                startActivity(button_Settings);
                 break;
         }
     }

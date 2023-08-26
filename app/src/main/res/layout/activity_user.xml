@@ -88,5 +88,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         style="@style/ButtonStyle"
         android:textColorHint="#EBFFFFFF"/>
+    <Button
+        android:id="@+id/button_Settings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Settings"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintTop_toBottomOf="@id/button_FTPActivity"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/ButtonStyle"
+        android:textColorHint="#EBFFFFFF"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

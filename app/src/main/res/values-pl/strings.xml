@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Smart Terrarium</string>
-    <string name="select_language">Select Language:</string>
-    <string name="apply">Apply</string>
+    <string name="select_language">Zaznaczony jezyk:</string>
+    <string name="apply">Potwierdz</string>
 
 
 

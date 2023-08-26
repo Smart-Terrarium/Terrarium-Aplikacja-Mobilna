@@ -1,7 +1,5 @@
 package com.example.test02;
 
-
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -30,11 +28,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -140,30 +133,13 @@ public class MainActivity extends AppCompatActivity {
         Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
         forgotPasswordButton.setOnClickListener(v -> {
             // Otwarcie nowej aktywności PasswordActivity
-            Intent intent = new Intent(MainActivity.this, PasswordActivity.class);
+            Intent intent = new Intent(MainActivity.this, ResetPasswordActivity.class);
             startActivity(intent);
         });
 
         baseUrlManager = new BaseUrl();
     }
-    private void trustAllCertificates() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {}
-                }
-        };
 
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustAllCerts, new SecureRandom());
-        mHttpClient = new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager)trustAllCerts[0])
-                .hostnameVerifier((hostname, session) -> true)
-                .build();
-    }
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
         @Override
         protected Boolean doInBackground(JSONObject... params) {

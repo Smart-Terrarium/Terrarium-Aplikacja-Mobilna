@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -21,7 +20,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PasswordActivity extends AppCompatActivity {
+public class ResetPasswordActivity extends AppCompatActivity {
 
     private EditText mEmailEditText;
     private Button mResetPasswordButton;
@@ -41,7 +40,7 @@ public class PasswordActivity extends AppCompatActivity {
         mResetPasswordButton.setOnClickListener(v -> {
             String email = mEmailEditText.getText().toString();
             if (email.isEmpty()) {
-                Toast.makeText(PasswordActivity.this, "Enter your email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ResetPasswordActivity.this, "Enter your email", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -83,9 +82,9 @@ public class PasswordActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
-                Toast.makeText(PasswordActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ResetPasswordActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(PasswordActivity.this, "Password reset failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ResetPasswordActivity.this, "Password reset failed", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -185,7 +185,6 @@ public class NotificationsActivity extends AppCompatActivity {
                     }
                 });
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
@@ -212,11 +211,9 @@ public class NotificationsActivity extends AppCompatActivity {
     private void changeNotificationStatus(String notificationID) {
         String url = "http://" +  BASE_URL + notificationID;
 
-        // Przykład kodu dla żądania PUT:
         JSONObject json = new JSONObject();
         try {
             json.put("served", true); // Ustawienie statusu na true w celu zmiany statusu
-            // Dodaj inne pola, jeśli są potrzebne
         } catch (JSONException e) {
             e.printStackTrace();
         }

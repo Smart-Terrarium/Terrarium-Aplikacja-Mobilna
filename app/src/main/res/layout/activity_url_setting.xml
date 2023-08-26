@@ -26,7 +26,7 @@
             android:id="@+id/currentUrlTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/saveButton"
+            android:layout_below="@id/saveUrlButton"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="-144dp"
             android:text=""
@@ -43,7 +43,7 @@
             android:hint="Enter address (example: 192.168.1.10)"
             android:textColorHint="#EBFFFFFF"/>
         <Button
-            android:id="@+id/saveButton"
+            android:id="@+id/saveUrlButton"
             style="@style/ButtonStyle"
             android:layout_width="363dp"
             android:layout_height="wrap_content"
@@ -51,6 +51,15 @@
             android:layout_centerHorizontal="true"
             android:text="Save"
             />
+
+        <Switch
+            android:id="@+id/darkModeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="200dp"
+            android:text="Dark Mode"
+            tools:ignore="NotSibling,UseSwitchCompatOrMaterialXml" />
 
 
     </RelativeLayout>

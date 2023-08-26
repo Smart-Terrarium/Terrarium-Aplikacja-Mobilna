@@ -84,7 +84,13 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".PasswordActivity"
+        <activity android:name=".ResetPasswordActivity"
+            tools:ignore="Instantiatable" />
+        <activity android:name=".ChangePasswordActivity"
+            tools:ignore="Instantiatable" />
+        <activity android:name=".ChangeLanguageActivity"
+            tools:ignore="Instantiatable" />
+        <activity android:name=".SettingsActivity"
             tools:ignore="Instantiatable" />
         <service
             android:name=".BackgroundNotificationService"
