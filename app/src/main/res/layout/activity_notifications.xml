@@ -36,12 +36,6 @@
             android:backgroundTint="#E6FFFFFF"
             android:text="Only Served"
             app:layout_constraintTop_toBottomOf="@id/resetListButton" />
-        <ImageView
-            android:id="@+id/backgroundImageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/background" />
 
 
         <View

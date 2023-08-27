@@ -3,13 +3,16 @@ package com.example.test02;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -49,7 +52,7 @@ public class BackgroundNotificationService extends Service {
 
         baseUrlManager = new MainActivity.BaseUrl();
 
-        startForeground(NOTIFICATION_ID, createNotification("Service is running"));
+       // startForeground(NOTIFICATION_ID, createNotification("Service is running"));
 
         new Thread(new Runnable() {
             public void run() {
@@ -91,36 +94,44 @@ public class BackgroundNotificationService extends Service {
     private void processEventData(String eventData) {
         try {
             Log.d("SSE", "Received event data: " + eventData);
-            eventData = eventData.replace("macasdasas", "");
 
-            JSONObject eventJson = new JSONObject(eventData);
-            String type = eventJson.optString("type");
-            if ("report".equals(type)) {
-                JSONObject payload = eventJson.optJSONObject("payload");
-                if (payload != null) {
-                    JSONObject alert = payload.optJSONObject("alert");
-                    if (alert != null) {
-                        String macAddress = alert.optString("mac_address");
-                        int alertNumber = alert.optInt("alert_number");
-                        String description = alert.optString("description");
-                        int priority = alert.optInt("priority");
+            int jsonStartIndex = eventData.indexOf('{'); // Find the index of the first '{'
+            if (jsonStartIndex >= 0) {
+                String jsonPart = eventData.substring(jsonStartIndex); // Extract the JSON part
+                JSONObject eventJson = new JSONObject(jsonPart);
 
-                        // Retrieve associated device name
-                        String deviceName = getDeviceNameByMac(macAddress);
+                String type = eventJson.optString("type");
+                if ("report".equals(type)) {
+                    JSONObject payload = eventJson.optJSONObject("payload");
+                    if (payload != null) {
+                        JSONObject alert = payload.optJSONObject("alert");
+                        if (alert != null) {
+                            String macAddress = alert.optString("mac_address");
+                            int alertNumber = alert.optInt("alert_number");
+                            String description = alert.optString("description");
+                            int priority = alert.optInt("priority");
 
-                        // Retrieve associated sensor names
-                        List<String> sensorNames = deviceToSensorsMap.get(macAddress);
+                            // Retrieve associated device name
+                            String deviceName = getDeviceNameByMac(macAddress);
 
-                        // Use deviceName, sensorNames, and other information as needed
-                        showSystemNotification("Alert: " + description, "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
+                            // Retrieve associated sensor names
+                            List<String> sensorNames = deviceToSensorsMap.get(macAddress);
+
+                            // Use deviceName, sensorNames, and other information as needed
+                            showSystemNotification("Alert: " + description, "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
+                        }
                     }
                 }
+            } else {
+                Log.e("SSE", "Invalid event data format: " + eventData);
             }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("SSE", "Error parsing JSON: " + e.getMessage());
         }
     }
+
+
 
     private String getDeviceNameByMac(String macAddress) {
         int index = deviceIds.indexOf(macAddress);
@@ -243,8 +254,11 @@ public class BackgroundNotificationService extends Service {
                 .setContentText(content)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
+
         return builder.build();
     }
+
+    // Wewnątrz metody showSystemNotification:
 
     private void showSystemNotification(String title, String message) {
         Context context = getApplicationContext();
@@ -252,6 +266,7 @@ public class BackgroundNotificationService extends Service {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Tworzenie kanału powiadomień
             String channelId = "channel_id";
             CharSequence channelName = "Channel Name";
             String channelDescription = "Channel Description";
@@ -262,16 +277,41 @@ public class BackgroundNotificationService extends Service {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        // Utworzenie akcji zamknięcia
+        Intent closeIntent = new Intent(context, CloseNotificationReceiver.class);
+        closeIntent.setAction("CLOSE_NOTIFICATION");
+        PendingIntent closePendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                closeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Dodanie FLAG_IMMUTABLE
+        );
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.background)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI) // Ustawienie dźwięku powiadomienia
+                .addAction(R.drawable.background, "Zamknij", closePendingIntent); // Dodanie akcji "Zamknij"
+
 
         int notificationId = 1;
         Notification notification = builder.build();
         notificationManager.notify(notificationId, notification);
+    }
+
+    // Klasa odbierająca akcję zamknięcia powiadomienia
+    public static class CloseNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("CLOSE_NOTIFICATION".equals(intent.getAction())) {
+                NotificationManager notificationManager =
+                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.cancel(1); // Zamykanie powiadomienia po ID
+            }
+        }
     }
 
     @Override

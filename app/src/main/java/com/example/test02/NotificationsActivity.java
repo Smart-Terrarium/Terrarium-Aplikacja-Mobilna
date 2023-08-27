@@ -1,8 +1,6 @@
 package com.example.test02;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -18,15 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,7 +39,6 @@ public class NotificationsActivity extends AppCompatActivity {
     private MainActivity.BaseUrl baseUrlManager;
     private String BASE_URL;
 
-    // Filtry
     private boolean sortByPriority = true;
     private boolean onlyServed = false;
 
@@ -68,12 +58,8 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
 
-
-
-        // Wywołanie fetchNotifications() PO trustAllCertificates()
         fetchNotifications();
 
-        // Obsługa kliknięcia na element listy powiadomień
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -96,28 +82,20 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
 
-
     private void resetNotificationList() {
-        // Wyzeruj filtry i odśwież listę
-        sortByPriority = true;
         onlyServed = false;
         applyFilters();
     }
 
-    // Metoda do ustawiania filtrów i odświeżania listy
     private void applyFilters() {
         fetchNotifications();
     }
 
-
-    // Obsługa kliknięcia przycisku filtrowania pokazującego tylko obsłużone
     public void onOnlyServedToggle(View view) {
-        onlyServed = !onlyServed;
+        onlyServed = true;
         applyFilters();
     }
 
-
-    // Wyświetlanie szczegółów powiadomienia w oknie dialogowym
     private void showNotificationDetails(int position) {
         try {
             JSONObject notification = new JSONArray(responseData).getJSONObject(position);
@@ -129,7 +107,6 @@ public class NotificationsActivity extends AppCompatActivity {
             String date = notification.getString("date");
             String priority = notification.getString("priority");
 
-            // Tworzenie tekstu ze szczegółami powiadomienia
             StringBuilder details = new StringBuilder();
             details.append("Description: ").append(description).append("\n")
                     .append("Device ID: ").append(deviceID).append("\n")
@@ -139,34 +116,38 @@ public class NotificationsActivity extends AppCompatActivity {
                     .append("Date: ").append(date).append("\n")
                     .append("Priority: ").append(priority).append("\n");
 
-            // Utworzenie i wyświetlenie okna dialogowego ze szczegółami powiadomienia
-            new AlertDialog.Builder(this)
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
                     .setTitle("Notification Details")
                     .setMessage(details.toString())
-                    .setPositiveButton("Change Status", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Wywołanie funkcji do zmiany statusu powiadomienia
-                            changeNotificationStatus(notificationID);
-                        }
-                    })
-                    .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Wywołanie funkcji do usunięcia powiadomienia
-                            deleteNotification(notificationID);
-                        }
-                    })
-                    .setNeutralButton("Cancel", null) // Przycisk "Cancel" bez dodatkowej akcji
-                    .show();
+                    .setNeutralButton("Cancel", null);
+
+            if (served.equals("true")) {
+                builder.setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteNotification(notificationID);
+                    }
+                });
+
+            }
+
+            if (served.equals("false")) {
+                builder.setNegativeButton("Change Status", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        changeNotificationStatus(notificationID);
+                    }
+                });
+            }
+
+            builder.show();
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    // Metoda do usuwania powiadomienia o podanym ID
     private void deleteNotification(String notificationId) {
-        String url = "http://" +  BASE_URL + "/" + notificationId;
+        String url = "http://" + BASE_URL + "/" + notificationId;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -185,6 +166,7 @@ public class NotificationsActivity extends AppCompatActivity {
                     }
                 });
             }
+
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
@@ -192,7 +174,7 @@ public class NotificationsActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(NotificationsActivity.this, "Notification deleted", Toast.LENGTH_SHORT).show();
-                            fetchNotifications(); // Odświeżenie listy po usunięciu
+                            fetchNotifications();
                         }
                     });
                 } else {
@@ -207,13 +189,11 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
 
-    // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "http://" +  BASE_URL + "/" +  notificationID;
-        System.out.println(url + "  URLLL");
+        String url = "http://" + BASE_URL + "/" + notificationID;
         JSONObject json = new JSONObject();
         try {
-            json.put("served", true); // Ustawienie statusu na true w celu zmiany statusu
+            json.put("served", true);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -244,7 +224,7 @@ public class NotificationsActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(NotificationsActivity.this, "Notification status changed", Toast.LENGTH_SHORT).show();
-                            fetchNotifications(); // Odświeżenie listy po zmianie statusu
+                            fetchNotifications();
                         }
                     });
                 } else {
@@ -259,11 +239,18 @@ public class NotificationsActivity extends AppCompatActivity {
         });
     }
 
-    // Metoda do pobierania powiadomień z serwera
     private void fetchNotifications() {
         String url = "http://" + BASE_URL +
-                "?sort_by_priority=" + sortByPriority +
-                "&only_served=" + onlyServed;
+                "?sort_by_priority=" + sortByPriority;
+
+        // Check conditions for "only_served" and "only_not_served"
+        if (onlyServed) {
+            url += "&only_served=true"; // Setting "only_served" to true
+        } else {
+            url += "&only_not_served=true"; // Setting "only_not_served" to true
+            url += "&sort_by_served=false"; // Setting "sort_by_served" to false
+        }
+
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer " + token)
@@ -284,17 +271,22 @@ public class NotificationsActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    responseData = response.body().string(); // Zapisanie danych odpowiedzi do późniejszego użycia
+                    responseData = response.body().string();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                // Parsowanie odpowiedzi JSON i aktualizacja listy powiadomień
                                 notificationList.clear();
                                 JSONArray jsonArray = new JSONArray(responseData);
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     JSONObject notification = jsonArray.getJSONObject(i);
                                     String description = notification.getString("description");
+                                    String served = notification.getString("served");
+
+                                    if (served.equals("false")) {
+                                        description = "New Alert! Click for check details\n" + description;
+                                    }
+
                                     notificationList.add(description);
                                 }
                                 notificationAdapter.notifyDataSetChanged();
@@ -313,4 +305,5 @@ public class NotificationsActivity extends AppCompatActivity {
                 }
             }
         });
-    }}
+    }
+}

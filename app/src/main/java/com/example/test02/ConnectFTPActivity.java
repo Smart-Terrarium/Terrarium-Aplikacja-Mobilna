@@ -41,6 +41,7 @@ import okhttp3.Response;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
@@ -98,9 +99,35 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
                 addNewDevice(name, macAddress);
             }
         });
+        Button showDetailsButton = findViewById(R.id.showDetailsButton);
+        showDetailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDetailsDialog();
+            }
+        });
 
         uploadButton.setOnClickListener(this);
         downloadButton.setOnClickListener(this);
+    }
+    private void showDetailsDialog() {
+        StringBuilder details = new StringBuilder();
+        // Append your details here
+        details.append("").append("\n")
+                .append("1. Enter the device name. (The mac address fills in automatically after download)").append("\n")
+                .append("2. Enter the address of the FTP server from the microcontroller").append("\n")
+                .append("3. enter the network name and password").append("\n")
+                .append("4. Click the 'UPLOAD CONFIGURATION' and 'DOWNLOAD MAC ADDRESS' buttons").append("\n")
+                .append("5. Click the 'ADD NEW DEVICE' ").append("\n");
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("To add a new device: ")
+                .setMessage(details.toString())
+                .setNeutralButton("Cancel", null);
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void addNewDevice(String name, String macAddress) {
