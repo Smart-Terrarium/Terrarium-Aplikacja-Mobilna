@@ -68,30 +68,6 @@ public class ChartActivity extends AppCompatActivity {
     private MainActivity.BaseUrl baseUrlManager;
     private String BaseUrl;
 
-    private void trustAllCertificates() throws Exception {
-        TrustManager[] trustAllCertificates = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                    }
-
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                    }
-                }
-        };
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, trustAllCertificates, new SecureRandom());
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCertificates[0])
-                .hostnameVerifier((hostname, session) -> true);
-
-        OkHttpClient client = builder.build();
-    }
 
 
     class Sensor {
@@ -291,11 +267,7 @@ public class ChartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            trustAllCertificates(); // Call the method to disable certificate validation
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         setContentView(R.layout.activity_chart);
         lineChart = findViewById(R.id.lineChart);
         deviceSpinner = findViewById(R.id.deviceSpinner);
@@ -353,8 +325,8 @@ public class ChartActivity extends AppCompatActivity {
     private void createWebSocketClient() {
         URI uri;
         try {
-            //uri = new URI(baseUrlManager.getBaseUrl(this) + ":8000/device/1/sensor/data");
-            uri = new URI(  "ws://192.168.88.252:8000/device/1/sensor/data");
+            uri = new URI("ws://" + baseUrlManager.getBaseUrl(this) + ":8000/device/1/sensor/data");
+           // uri = new URI(  "ws://192.168.88.252:8000/device/1/sensor/data");
             System.out.println(uri+"adresss90909090");
         } catch (URISyntaxException e) {
             e.printStackTrace();

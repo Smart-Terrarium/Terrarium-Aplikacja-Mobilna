@@ -53,6 +53,7 @@ public class BackgroundNotificationService extends Service {
     private void startSSEConnection() {
         try {
             URL url = new URL("http://" + baseUrlManager.getBaseUrl(this) + ":8000/devices/notifier/alerts");
+            System.out.println(url + " URL Z BACKGROUND");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Authorization", "Bearer " + token);

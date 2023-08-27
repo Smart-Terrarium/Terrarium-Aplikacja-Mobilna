@@ -166,7 +166,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do usuwania powiadomienia o podanym ID
     private void deleteNotification(String notificationId) {
-        String url = "http://" +  BASE_URL + notificationId;
+        String url = "http://" +  BASE_URL + "/" + notificationId;
 
         Request request = new Request.Builder()
                 .url(url)
@@ -209,8 +209,8 @@ public class NotificationsActivity extends AppCompatActivity {
 
     // Metoda do zmiany statusu powiadomienia
     private void changeNotificationStatus(String notificationID) {
-        String url = "http://" +  BASE_URL + notificationID;
-
+        String url = "http://" +  BASE_URL + "/" +  notificationID;
+        System.out.println(url + "  URLLL");
         JSONObject json = new JSONObject();
         try {
             json.put("served", true); // Ustawienie statusu na true w celu zmiany statusu
