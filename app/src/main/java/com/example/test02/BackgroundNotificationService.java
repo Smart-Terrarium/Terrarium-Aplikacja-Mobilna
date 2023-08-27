@@ -12,9 +12,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-
 import androidx.core.app.NotificationCompat;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,13 +23,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BackgroundNotificationService extends Service {
 
     private static final int NOTIFICATION_ID = 1;
     private String token;
     private MainActivity.BaseUrl baseUrlManager;
+
+    private List<String> deviceNames = new ArrayList<>();
+    private List<String> deviceIds = new ArrayList<>();
+    private Map<String, List<String>> deviceToSensorsMap = new HashMap<>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -46,6 +53,7 @@ public class BackgroundNotificationService extends Service {
 
         new Thread(new Runnable() {
             public void run() {
+                getListDeviceIdsAndSensors(token); // Fetch devices and sensors
                 startSSEConnection();
             }
         }).start();
@@ -53,17 +61,13 @@ public class BackgroundNotificationService extends Service {
         return START_STICKY;
     }
 
-
     private void startSSEConnection() {
         try {
             URL url = new URL("http://" + baseUrlManager.getBaseUrl(this) + ":8000/devices/notifier/alerts");
-            System.out.println(url + " URL Z BACKGROUND");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Authorization", "Bearer " + token);
             connection.setRequestProperty("Accept", "text/event-stream");
-            System.out.println(token + "TTTTTTTTTTTTTT");
-
 
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
@@ -87,11 +91,6 @@ public class BackgroundNotificationService extends Service {
     private void processEventData(String eventData) {
         try {
             Log.d("SSE", "Received event data: " + eventData);
-
-
-            System.out.println("Event Data: " + eventData);
-
-
             eventData = eventData.replace("macasdasas", "");
 
             JSONObject eventJson = new JSONObject(eventData);
@@ -106,14 +105,119 @@ public class BackgroundNotificationService extends Service {
                         String description = alert.optString("description");
                         int priority = alert.optInt("priority");
 
+                        // Retrieve associated device name
+                        String deviceName = getDeviceNameByMac(macAddress);
 
-                        showSystemNotification("Alert: " + description, "Priority: " + priority);
+                        // Retrieve associated sensor names
+                        List<String> sensorNames = deviceToSensorsMap.get(macAddress);
+
+                        // Use deviceName, sensorNames, and other information as needed
+                        showSystemNotification("Alert: " + description, "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
                     }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("SSE", "Error parsing JSON: " + e.getMessage());
+        }
+    }
+
+    private String getDeviceNameByMac(String macAddress) {
+        int index = deviceIds.indexOf(macAddress);
+        if (index != -1 && index < deviceNames.size()) {
+            return deviceNames.get(index);
+        }
+        return "Unknown Device";
+    }
+
+    private void getListDeviceIdsAndSensors(String token) {
+        getListDeviceIds(token);
+        for (String deviceId : deviceIds) {
+            getListSensorIds(token, deviceId);
+        }
+    }
+
+    private void getListDeviceIds(String token) {
+        String baseUrl = baseUrlManager.getBaseUrl(this);
+        if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            baseUrl = "http://" + baseUrl;
+        }
+
+        String url = baseUrl + ":8000/devices";
+        HttpURLConnection connection = null;
+        try {
+            URL requestUrl = new URL(url);
+            connection = (HttpURLConnection) requestUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                JSONArray devicesArray = new JSONArray(response.toString());
+                for (int i = 0; i < devicesArray.length(); i++) {
+                    JSONObject deviceJson = devicesArray.getJSONObject(i);
+                    int deviceId = deviceJson.getInt("id");
+                    String deviceName = deviceJson.getString("mac_address");
+                    deviceNames.add(deviceName);
+                    deviceIds.add(String.valueOf(deviceId));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private void getListSensorIds(String token, String selectedDevice) {
+        String baseUrl = baseUrlManager.getBaseUrl(this);
+        if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+            baseUrl = "http://" + baseUrl;
+        }
+
+        String url = baseUrl + ":8000/device/" + selectedDevice;
+        HttpURLConnection connection = null;
+        try {
+            URL requestUrl = new URL(url);
+            connection = (HttpURLConnection) requestUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Authorization", "Bearer " + token);
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                JSONArray sensorsArray = new JSONObject(response.toString()).getJSONArray("sensors");
+                List<String> sensorNames = new ArrayList<>();
+                for (int i = 0; i < sensorsArray.length(); i++) {
+                    JSONObject sensorJson = sensorsArray.getJSONObject(i);
+                    String sensorName = sensorJson.getString("pin_number");
+                    sensorNames.add(sensorName);
+                }
+                deviceToSensorsMap.put(selectedDevice, sensorNames);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
@@ -147,7 +251,6 @@ public class BackgroundNotificationService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = "channel_id";
             CharSequence channelName = "Channel Name";
@@ -159,14 +262,12 @@ public class BackgroundNotificationService extends Service {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.background)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
-
 
         int notificationId = 1;
         Notification notification = builder.build();
