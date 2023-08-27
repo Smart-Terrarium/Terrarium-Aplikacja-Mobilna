@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
+
 
 import androidx.core.app.NotificationCompat;
 
@@ -27,6 +27,7 @@ import java.net.URL;
 
 public class BackgroundNotificationService extends Service {
 
+    private static final int NOTIFICATION_ID = 1;
     private String token;
     private MainActivity.BaseUrl baseUrlManager;
 
@@ -41,6 +42,8 @@ public class BackgroundNotificationService extends Service {
 
         baseUrlManager = new MainActivity.BaseUrl();
 
+        startForeground(NOTIFICATION_ID, createNotification("Service is running"));
+
         new Thread(new Runnable() {
             public void run() {
                 startSSEConnection();
@@ -49,6 +52,7 @@ public class BackgroundNotificationService extends Service {
 
         return START_STICKY;
     }
+
 
     private void startSSEConnection() {
         try {
@@ -113,7 +117,30 @@ public class BackgroundNotificationService extends Service {
         }
     }
 
+    private Notification createNotification(String content) {
+        Context context = getApplicationContext();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "channel_id";
+            CharSequence channelName = "Channel Name";
+            String channelDescription = "Channel Description";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel notificationChannel =
+                    new NotificationChannel(channelId, channelName, importance);
+            notificationChannel.setDescription(channelDescription);
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
+                .setSmallIcon(R.drawable.background)
+                .setContentTitle("Foreground Service")
+                .setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        return builder.build();
+    }
 
     private void showSystemNotification(String title, String message) {
         Context context = getApplicationContext();
