@@ -21,6 +21,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.NOTIFICATION_DURING_SETUP"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
 
     <meta-data
@@ -37,6 +41,10 @@
         tools:targetApi="31"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true">
+        <receiver
+            android:name=".BackgroundNotificationService$CloseNotificationReceiver"
+            android:enabled="true"
+            android:exported="true" />
 
         <activity android:name="com.example.test02.SplashActivity"
             android:exported="true">
@@ -100,7 +108,13 @@
         <service
             android:name=".BackgroundNotificationService"
             android:exported="false" />
-
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

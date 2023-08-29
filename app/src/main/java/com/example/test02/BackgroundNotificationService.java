@@ -8,9 +8,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
@@ -22,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -52,7 +49,7 @@ public class BackgroundNotificationService extends Service {
 
         baseUrlManager = new MainActivity.BaseUrl();
 
-       // startForeground(NOTIFICATION_ID, createNotification("Service is running"));
+        startForeground(NOTIFICATION_ID, createNotification());
 
         new Thread(new Runnable() {
             public void run() {
@@ -232,7 +229,7 @@ public class BackgroundNotificationService extends Service {
         }
     }
 
-    private Notification createNotification(String content) {
+    private Notification createNotification() {
         Context context = getApplicationContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -248,11 +245,22 @@ public class BackgroundNotificationService extends Service {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        // Utworzenie akcji zamknięcia
+        Intent closeIntent = new Intent(context, CloseNotificationReceiver.class);
+        closeIntent.setAction("CLOSE_NOTIFICATION");
+        PendingIntent closePendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                closeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Dodanie FLAG_IMMUTABLE
+        );
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.background)
-                .setContentTitle("Foreground Service")
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI) // Ustawienie dźwięku powiadomienia
+                .addAction(R.drawable.background, "Zamknij", closePendingIntent); // Dodanie akcji "Zamknij"
 
 
         return builder.build();
@@ -306,10 +314,14 @@ public class BackgroundNotificationService extends Service {
     public static class CloseNotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             if ("CLOSE_NOTIFICATION".equals(intent.getAction())) {
+                System.out.println(intent.getAction());
+                System.out.println("ZAMKNIĘCIEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                 NotificationManager notificationManager =
                         (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancel(1); // Zamykanie powiadomienia po ID
+                notificationManager.cancelAll(); // Zamykanie powiadomienia po ID
+
             }
         }
     }
