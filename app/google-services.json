@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "410059855251",
+    "project_id": "smartterrariums21161",
+    "storage_bucket": "smartterrariums21161.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410059855251:android:d39c9f3051d810c388c466",
+        "android_client_info": {
+          "package_name": "com.example.SmartTerrarium"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "410059855251-gc0sb0g6iupt8bg6io4mdcle10cslvcg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMjGEhBJrQMA290cngwW9s9eTGjAA5rHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "410059855251-gc0sb0g6iupt8bg6io4mdcle10cslvcg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
