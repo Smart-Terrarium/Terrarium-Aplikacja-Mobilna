@@ -1,15 +1,19 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,13 +56,17 @@ public class NotificationsActivity extends AppCompatActivity {
         baseUrlManager = new MainActivity.BaseUrl();
         BASE_URL = baseUrlManager.getBaseUrl(this) + ":8000/devices/alerts";
 
-        token = getIntent().getStringExtra("auth_token");
+        token = getSharedPreferences("MyPrefs", MODE_PRIVATE).getString("auth_token", null);
         notificationList = new ArrayList<>();
         notificationAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notificationList);
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
 
         fetchNotifications();
+
+        // Initialize Firebase
+
+
 
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -80,6 +88,17 @@ public class NotificationsActivity extends AppCompatActivity {
                 onOnlyServedToggle(v);
             }
         });
+
+        Button backToUserButton = findViewById(R.id.backToUserButton);
+        backToUserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Tworzymy nową intencję, aby wrócić do UserActivity
+                Intent intent = new Intent(NotificationsActivity.this, UserActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void resetNotificationList() {

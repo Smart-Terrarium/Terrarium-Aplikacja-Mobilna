@@ -1,4 +1,4 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 public class BackgroundNotificationService extends Service {
 
-    private static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_ID = 100;
     private String token;
     private MainActivity.BaseUrl baseUrlManager;
 
@@ -38,6 +38,8 @@ public class BackgroundNotificationService extends Service {
     private List<String> deviceIds = new ArrayList<>();
     private Map<String, List<String>> deviceToSensorsMap = new HashMap<>();
 
+    private List<Notification> notificationList = new ArrayList<>();
+    private Map<Integer, Notification> activeNotifications = new HashMap<>();
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
@@ -49,16 +51,57 @@ public class BackgroundNotificationService extends Service {
 
         baseUrlManager = new MainActivity.BaseUrl();
 
-        startForeground(NOTIFICATION_ID, createNotification());
+        createNotificationChannel();
+        Notification notification = buildNotification("Foreground Service", "Service is running");
+        startForeground(NOTIFICATION_ID, notification);
 
         new Thread(new Runnable() {
             public void run() {
-                getListDeviceIdsAndSensors(token); // Fetch devices and sensors
+                getListDeviceIdsAndSensors(token);
                 startSSEConnection();
             }
         }).start();
 
         return START_STICKY;
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "channel_id";
+            CharSequence channelName = "Channel Name";
+            String channelDescription = "Channel Description";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel notificationChannel =
+                    new NotificationChannel(channelId, channelName, importance);
+            notificationChannel.setDescription(channelDescription);
+
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
+    private Notification buildNotification(String title, String message) {
+        Context context = getApplicationContext();
+
+        Intent notificationIntent = new Intent(context, NotificationsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
+                .setSmallIcon(R.drawable.background)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+
+        return builder.build();
     }
 
     private void startSSEConnection() {
@@ -90,11 +133,9 @@ public class BackgroundNotificationService extends Service {
 
     private void processEventData(String eventData) {
         try {
-            Log.d("SSE", "Received event data: " + eventData);
-
-            int jsonStartIndex = eventData.indexOf('{'); // Find the index of the first '{'
+            int jsonStartIndex = eventData.indexOf('{');
             if (jsonStartIndex >= 0) {
-                String jsonPart = eventData.substring(jsonStartIndex); // Extract the JSON part
+                String jsonPart = eventData.substring(jsonStartIndex);
                 JSONObject eventJson = new JSONObject(jsonPart);
 
                 String type = eventJson.optString("type");
@@ -108,14 +149,14 @@ public class BackgroundNotificationService extends Service {
                             String description = alert.optString("description");
                             int priority = alert.optInt("priority");
 
-                            // Retrieve associated device name
                             String deviceName = getDeviceNameByMac(macAddress);
-
-                            // Retrieve associated sensor names
                             List<String> sensorNames = deviceToSensorsMap.get(macAddress);
 
-                            // Use deviceName, sensorNames, and other information as needed
-                            showSystemNotification("Alert: " + description, "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
+                            Notification notification = buildNotification("Alert: " + description,
+                                    "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
+
+                            notificationList.add(notification);
+                            updateSystemNotifications();
                         }
                     }
                 }
@@ -127,8 +168,6 @@ public class BackgroundNotificationService extends Service {
             Log.e("SSE", "Error parsing JSON: " + e.getMessage());
         }
     }
-
-
 
     private String getDeviceNameByMac(String macAddress) {
         int index = deviceIds.indexOf(macAddress);
@@ -229,101 +268,57 @@ public class BackgroundNotificationService extends Service {
         }
     }
 
-    private Notification createNotification() {
-        Context context = getApplicationContext();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "channel_id";
-            CharSequence channelName = "Channel Name";
-            String channelDescription = "Channel Description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel notificationChannel =
-                    new NotificationChannel(channelId, channelName, importance);
-            notificationChannel.setDescription(channelDescription);
-            NotificationManager notificationManager =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        // Utworzenie akcji zamknięcia
-        Intent closeIntent = new Intent(context, CloseNotificationReceiver.class);
-        closeIntent.setAction("CLOSE_NOTIFICATION");
-        PendingIntent closePendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                closeIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Dodanie FLAG_IMMUTABLE
-        );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
-                .setSmallIcon(R.drawable.background)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI) // Ustawienie dźwięku powiadomienia
-                .addAction(R.drawable.background, "Zamknij", closePendingIntent); // Dodanie akcji "Zamknij"
-
-
-        return builder.build();
-    }
-
-    // Wewnątrz metody showSystemNotification:
-
-    private void showSystemNotification(String title, String message) {
+    private void updateSystemNotifications() {
         Context context = getApplicationContext();
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Tworzenie kanału powiadomień
-            String channelId = "channel_id";
-            CharSequence channelName = "Channel Name";
-            String channelDescription = "Channel Description";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel notificationChannel =
-                    new NotificationChannel(channelId, channelName, importance);
-            notificationChannel.setDescription(channelDescription);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        // Utworzenie akcji zamknięcia
-        Intent closeIntent = new Intent(context, CloseNotificationReceiver.class);
-        closeIntent.setAction("CLOSE_NOTIFICATION");
-        PendingIntent closePendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                closeIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Dodanie FLAG_IMMUTABLE
-        );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
-                .setSmallIcon(R.drawable.background)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI) // Ustawienie dźwięku powiadomienia
-                .addAction(R.drawable.background, "Zamknij", closePendingIntent); // Dodanie akcji "Zamknij"
-
-
-        int notificationId = 1;
-        Notification notification = builder.build();
-        notificationManager.notify(notificationId, notification);
-    }
-
-    // Klasa odbierająca akcję zamknięcia powiadomienia
-    public static class CloseNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if ("CLOSE_NOTIFICATION".equals(intent.getAction())) {
-                System.out.println(intent.getAction());
-                System.out.println("ZAMKNIĘCIEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-                NotificationManager notificationManager =
-                        (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancelAll(); // Zamykanie powiadomienia po ID
-
+        // Cancel notifications that are no longer active
+        for (int id : activeNotifications.keySet()) {
+            if (!notificationList.contains(activeNotifications.get(id))) {
+                notificationManager.cancel(id);
             }
         }
+
+        // Update active notifications and notify
+        for (int i = 0; i < notificationList.size(); i++) {
+            Notification notification = notificationList.get(i);
+            activeNotifications.put(i + 1, notification);
+            notificationManager.notify(i + 1, notification);
+        }
+    }
+
+    public class CloseNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("CLOSE_NOTIFICATION".equals(intent.getAction())) {
+                int notificationId = intent.getIntExtra("notification_id", -1);
+                if (notificationId != -1) {
+                    BackgroundNotificationService service = (BackgroundNotificationService) context;
+                    service.removeNotification(notificationId);
+                }
+            }
+        }
+    }
+
+    public void removeNotification(int notificationId) {
+        if (activeNotifications.containsKey(notificationId)) {
+            activeNotifications.remove(notificationId);
+            for (int i = 0; i < notificationList.size(); i++) {
+                if (notificationList.get(i).equals(activeNotifications.get(notificationId))) {
+                    notificationList.remove(i);
+                    break;
+                }
+            }
+            updateSystemNotifications();
+        }
+    }
+
+    public void clearNotifications() {
+        notificationList.clear();
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
     }
 
     @Override

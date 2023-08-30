@@ -1,4 +1,4 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.annotations.SerializedName;
-
 public class UserActivity extends AppCompatActivity implements View.OnClickListener  {
 
     private TextView mEmailTextView;
@@ -21,7 +19,7 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
     private Button FTPActivity;
     private String token;
     private Button button_Settings;
-
+    private Button button_logout;
 
     @SuppressLint("MissingInflatedId")
 
@@ -34,7 +32,7 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
         mTokenTextView = findViewById(R.id.tokenTextView);
 
         // odczytaj token z Intentu i wyświetl go w TextView
-        token = getIntent().getStringExtra("auth_token"); // Przypisanie wartości do zmiennej token
+        token = getSharedPreferences("MyPrefs", MODE_PRIVATE).getString("auth_token", null);
         mTokenTextView.setText(token);
 
         // odczytaj email i wyświetl go w TextView
@@ -54,11 +52,16 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
         button_Settings = findViewById(R.id.button_Settings);
         button_Settings.setOnClickListener(this);
 
+        button_logout = findViewById(R.id.button_logout);
+        button_logout.setOnClickListener(this);
 
+        System.out.println(token + " token");
 
         Intent serviceIntent = new Intent(this, BackgroundNotificationService.class);
         serviceIntent.putExtra("auth_token", token);
         startService(serviceIntent);
+
+
     }
     @Override
     public void onClick(View v) {
@@ -83,6 +86,20 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
                 button_Settings.putExtra("auth_token", token);
                 startActivity(button_Settings);
                 break;
+            case R.id.button_logout:
+                clearAuthToken();
+
+                // Start the MainActivity or any appropriate activity
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish(); // Close the current activity
+                break;
         }
+    }
+
+    private void clearAuthToken() {
+        SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
+        editor.remove("auth_token");
+        editor.apply();
     }
 }

@@ -1,18 +1,10 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.MailTo;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -38,13 +30,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import android.content.Context;
-import android.os.Bundle;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.HashMap;
 
 public class ConnectFTPActivity extends AppCompatActivity implements View.OnClickListener {
 

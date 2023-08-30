@@ -1,4 +1,4 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -11,7 +11,6 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import okhttp3.MediaType;

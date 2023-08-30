@@ -1,4 +1,4 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.content.Context;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.test02">
+    package="com.example.SmartTerrariumAplikacjaMobilna">
 
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -25,7 +25,7 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <meta-data
         android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -42,11 +42,11 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true">
         <receiver
-            android:name=".BackgroundNotificationService$CloseNotificationReceiver"
+            android:name="com.example.SmartTerrariumAplikacjaMobilna.BackgroundNotificationService$CloseNotificationReceiver"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name="com.example.test02.SplashActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -54,7 +54,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.MainActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
@@ -63,7 +63,7 @@
                  />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.ChartActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.ChartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -71,25 +71,25 @@
 
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.NotificationsActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.NotificationsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.UserActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.UserActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.ConnectFTPActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.ConnectFTPActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.test02.UrlActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.UrlActivity"
             android:exported="true"
             tools:ignore="Instantiatable">
             <intent-filter>
@@ -97,24 +97,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ResetPasswordActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.ResetPasswordActivity"
             tools:ignore="Instantiatable" />
-        <activity android:name=".ChangePasswordActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.ChangePasswordActivity"
             tools:ignore="Instantiatable" />
-        <activity android:name=".ChangeLanguageActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.ChangeLanguageActivity"
             tools:ignore="Instantiatable" />
-        <activity android:name=".SettingsActivity"
+        <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.SettingsActivity"
             tools:ignore="Instantiatable" />
         <service
-            android:name=".BackgroundNotificationService"
+            android:name="com.example.SmartTerrariumAplikacjaMobilna.BackgroundNotificationService"
             android:exported="false" />
-        <service
-            android:name=".MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
     </application>
 
 </manifest>

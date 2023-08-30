@@ -1,27 +1,23 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
-import org.json.JSONException;
-import android.content.Intent;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -29,10 +25,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
 public class MainActivity extends AppCompatActivity {
-
-    private static final String TAG = "MainActivity";
 
     private EditText mEmailEditText;
     private EditText mPasswordEditText;
@@ -45,9 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText mBaseUrlEditText;
     private BaseUrl baseUrlManager;
 
-
     public static class BaseUrl {
-        private String baseUrl = "http://10.0.2.2:8000";
+        private String baseUrl = "http://10.0.2.2";
 
         public String getBaseUrl(Context context) {
             SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
@@ -62,7 +54,11 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
     }
-
+    private void saveAuthToken(String token) {
+        SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
+        editor.putString("auth_token", token);
+        editor.apply();
+    }
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -77,18 +73,20 @@ public class MainActivity extends AppCompatActivity {
         mTokenTextView = findViewById(R.id.tokenTextView);
         mEmailTextView = findViewById(R.id.emailTextView);
 
+        mHttpClient = new OkHttpClient();
+
+        baseUrlManager = new BaseUrl();  // Inicjalizacja baseUrlManager przed użyciem
+
+
+
+
         mAuthToken = getIntent().getStringExtra("auth_token");
-        mTokenTextView.setText(mAuthToken);
 
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", "");
         mEmailTextView.setText(email);
+
         mBaseUrlEditText = findViewById(R.id.baseUrlEditText);
-
-        mHttpClient = new OkHttpClient();
-
-
-        @SuppressLint("WrongViewCast")
 
         ImageButton UrlActivityButton = findViewById(R.id.settingsButton);
         UrlActivityButton.setOnClickListener(v -> {
@@ -129,16 +127,10 @@ public class MainActivity extends AppCompatActivity {
             }
             new RegisterTask().execute(json);
         });
-
-        Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
-        forgotPasswordButton.setOnClickListener(v -> {
-            // Otwarcie nowej aktywności PasswordActivity
-            Intent intent = new Intent(MainActivity.this, ResetPasswordActivity.class);
-            startActivity(intent);
-        });
-
-        baseUrlManager = new BaseUrl();
     }
+
+
+
 
     private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
         @Override
@@ -150,10 +142,6 @@ public class MainActivity extends AppCompatActivity {
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
             String baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
-            if (baseUrl.isEmpty()) {
-                baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
-            }
-
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
                 baseUrl = "http://" + baseUrl;
@@ -164,17 +152,13 @@ public class MainActivity extends AppCompatActivity {
                     .post(formBody)
                     .build();
 
-
             try {
                 Response response = mHttpClient.newCall(request).execute();
                 if (response.isSuccessful()) {
                     if (response.code() == 200) {
                         String responseBody = response.body().string();
                         JSONObject responseJson = new JSONObject(responseBody);
-                        System.out.println(responseJson.toString());
                         mAuthToken = responseJson.getString("access_token");
-                    } else {
-                        System.out.println("problem");
                     }
                     return true;
                 } else {
@@ -192,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
+                saveAuthToken(mAuthToken);  // Save the token
+
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
@@ -206,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class RegisterTask extends AsyncTask<JSONObject, Void, Boolean> {
+        private class RegisterTask extends AsyncTask<JSONObject, Void, Boolean> {
         @Override
         protected Boolean doInBackground(JSONObject... params) {
             if (params[0] == null) {
@@ -216,14 +202,11 @@ public class MainActivity extends AppCompatActivity {
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
             String baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
-            if (baseUrl.isEmpty()) {
-                baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
-            }
 
             if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
                 baseUrl = "http://" + baseUrl;
             }
-            System.out.println(baseUrl);
+
             Request request = new Request.Builder()
                     .url(baseUrl + ":8000/register")
                     .post(formBody)
@@ -233,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 Response response = mHttpClient.newCall(request).execute();
                 if (response.isSuccessful()) {
                     if (response.code() == 201) {
-                        System.out.println("udalo sie ");
+                        // Registration successful
                     }
                     return true;
                 } else {
@@ -248,14 +231,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
-                Toast.makeText(MainActivity.this, "Zarejestrowano! Zaloguj się!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Registered! Please log in.", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
-
-
             } else {
                 Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
             }

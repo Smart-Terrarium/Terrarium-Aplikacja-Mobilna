@@ -1,4 +1,4 @@
-package com.example.test02;
+package com.example.SmartTerrariumAplikacjaMobilna;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
