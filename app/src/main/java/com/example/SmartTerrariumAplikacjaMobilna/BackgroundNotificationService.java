@@ -52,7 +52,7 @@ public class BackgroundNotificationService extends Service {
         baseUrlManager = new MainActivity.BaseUrl();
 
         createNotificationChannel();
-        Notification notification = buildNotification("Foreground Service", "Service is running");
+        Notification notification = buildNotification("Foreground Service", "Service notification");
         startForeground(NOTIFICATION_ID, notification);
 
         new Thread(new Runnable() {
