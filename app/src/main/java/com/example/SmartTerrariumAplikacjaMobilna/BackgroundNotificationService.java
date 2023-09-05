@@ -1,36 +1,21 @@
 package com.example.SmartTerrariumAplikacjaMobilna;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.IBinder;
-import android.provider.Settings;
-import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.app.*;
+import android.content.*;
+import android.os.*;
+import android.provider.*;
+import android.util.*;
+import androidx.core.app.*;
+import org.json.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 public class BackgroundNotificationService extends Service {
 
     private static final int NOTIFICATION_ID = 100;
+    public static final String CLOSE_NOTIFICATION_ACTION = "com.example.SmartTerrariumAplikacjaMobilna.CLOSE_NOTIFICATION";
+
     private String token;
     private MainActivity.BaseUrl baseUrlManager;
 
@@ -39,7 +24,9 @@ public class BackgroundNotificationService extends Service {
     private Map<String, List<String>> deviceToSensorsMap = new HashMap<>();
 
     private List<Notification> notificationList = new ArrayList<>();
-    private Map<Integer, Notification> activeNotifications = new HashMap<>();
+
+    private CloseNotificationReceiver closeNotificationReceiver;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
@@ -52,8 +39,13 @@ public class BackgroundNotificationService extends Service {
         baseUrlManager = new MainActivity.BaseUrl();
 
         createNotificationChannel();
-        Notification notification = buildNotification("Foreground Service", "Service notification");
+        Notification notification = buildNotification("Foreground Service", "Service notifications are running");
         startForeground(NOTIFICATION_ID, notification);
+
+        // Register the CloseNotificationReceiver to listen for CLOSE_NOTIFICATION broadcasts
+        closeNotificationReceiver = new CloseNotificationReceiver();
+        IntentFilter closeNotificationFilter = new IntentFilter(CLOSE_NOTIFICATION_ACTION);
+        registerReceiver(closeNotificationReceiver, closeNotificationFilter);
 
         new Thread(new Runnable() {
             public void run() {
@@ -64,6 +56,7 @@ public class BackgroundNotificationService extends Service {
 
         return START_STICKY;
     }
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -84,6 +77,7 @@ public class BackgroundNotificationService extends Service {
     private Notification buildNotification(String title, String message) {
         Context context = getApplicationContext();
 
+        // Intent for the notification's main action (e.g., opening an activity)
         Intent notificationIntent = new Intent(context, NotificationsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
@@ -92,17 +86,28 @@ public class BackgroundNotificationService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
+        // Intent for the custom action (e.g., clearing notifications)
+        Intent closeNotificationIntent = new Intent(BackgroundNotificationService.CLOSE_NOTIFICATION_ACTION);
+        PendingIntent closePendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                closeNotificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
-                .setSmallIcon(R.drawable.background)
+                .setSmallIcon(R.drawable.logo)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .addAction(R.drawable.logo, "Clear", closePendingIntent); // Add a custom action button
 
         return builder.build();
     }
+
 
     private void startSSEConnection() {
         try {
@@ -154,7 +159,6 @@ public class BackgroundNotificationService extends Service {
 
                             Notification notification = buildNotification("Alert: " + description,
                                     "Device: " + deviceName + ", Sensors: " + sensorNames + ", Priority: " + priority);
-
                             notificationList.add(notification);
                             updateSystemNotifications();
                         }
@@ -273,44 +277,20 @@ public class BackgroundNotificationService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Cancel notifications that are no longer active
-        for (int id : activeNotifications.keySet()) {
-            if (!notificationList.contains(activeNotifications.get(id))) {
-                notificationManager.cancel(id);
-            }
-        }
+        notificationManager.cancelAll();
 
-        // Update active notifications and notify
         for (int i = 0; i < notificationList.size(); i++) {
-            Notification notification = notificationList.get(i);
-            activeNotifications.put(i + 1, notification);
-            notificationManager.notify(i + 1, notification);
+            notificationManager.notify(i + 1, notificationList.get(i));
         }
     }
 
     public class CloseNotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if ("CLOSE_NOTIFICATION".equals(intent.getAction())) {
-                int notificationId = intent.getIntExtra("notification_id", -1);
-                if (notificationId != -1) {
-                    BackgroundNotificationService service = (BackgroundNotificationService) context;
-                    service.removeNotification(notificationId);
-                }
+            if (CLOSE_NOTIFICATION_ACTION.equals(intent.getAction())) {
+                clearNotifications();
+                Log.d("NotificationService", "Close Notification Action Received");
             }
-        }
-    }
-
-    public void removeNotification(int notificationId) {
-        if (activeNotifications.containsKey(notificationId)) {
-            activeNotifications.remove(notificationId);
-            for (int i = 0; i < notificationList.size(); i++) {
-                if (notificationList.get(i).equals(activeNotifications.get(notificationId))) {
-                    notificationList.remove(i);
-                    break;
-                }
-            }
-            updateSystemNotifications();
         }
     }
 
@@ -319,8 +299,18 @@ public class BackgroundNotificationService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+        Log.d("NotificationService", "Notifications cleared");
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Unregister the CloseNotificationReceiver
+        if (closeNotificationReceiver != null) {
+            unregisterReceiver(closeNotificationReceiver);
+        }
+    }
     @Override
     public IBinder onBind(Intent intent) {
         return null;

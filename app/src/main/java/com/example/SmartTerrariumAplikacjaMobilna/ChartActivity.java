@@ -60,7 +60,7 @@ public class ChartActivity extends AppCompatActivity {
     private String selectedDevice;
     private MainActivity.BaseUrl baseUrlManager;
     private String BaseUrl;
-
+    private String user_id;
 
 
     class Sensor {
@@ -136,6 +136,8 @@ public class ChartActivity extends AppCompatActivity {
                         JSONArray responseJson = null;
                         try {
                             responseJson = new JSONArray(responseBody);
+                            deviceNames.clear();  // Wyczyść listę przed dodaniem nowych elementów
+                            deviceIds.clear();    // Wyczyść listę przed dodaniem nowych elementów
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject deviceJson = responseJson.getJSONObject(i);
                                 int deviceId = deviceJson.getInt("id");
@@ -150,6 +152,11 @@ public class ChartActivity extends AppCompatActivity {
                                     ArrayAdapter<String> deviceAdapter = new ArrayAdapter<>(ChartActivity.this, android.R.layout.simple_spinner_item, deviceNames);
                                     deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     deviceSpinner.setAdapter(deviceAdapter);
+
+                                    // Tutaj możesz ustawić user_id na podstawie wybranej pozycji w Spinnerze
+                                    if (!deviceIds.isEmpty()) {
+                                        user_id = deviceIds.get(0); // Domyślnie wybieramy pierwszy element
+                                    }
 
                                     if (deviceNames.contains(selectedDeviceId)) {
                                         int selectedDeviceIndex = deviceNames.indexOf(selectedDeviceId);
@@ -168,6 +175,7 @@ public class ChartActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void getListSensorIds(String token, String selectedDevice) {
 
@@ -272,11 +280,14 @@ public class ChartActivity extends AppCompatActivity {
         createWebSocketClient();
 
 
+
         deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 if (position >= 0 && position < deviceIds.size()) {
                     selectedDevice = deviceIds.get(position);
+                    user_id = selectedDevice; // Ustaw user_id na podstawie wybranej pozycji
+                    createWebSocketClient();
                     getListSensorIds(mAuthToken, selectedDevice);
                 }
             }
@@ -286,6 +297,7 @@ public class ChartActivity extends AppCompatActivity {
 
             }
         });
+
 
         sensorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -316,9 +328,11 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     private void createWebSocketClient() {
+
         URI uri;
         try {
-            uri = new URI("ws://" + baseUrlManager.getBaseUrl(this) + ":8000/device/1/sensor/data");
+            System.out.println(user_id + " USER 222");
+            uri = new URI("ws://" + baseUrlManager.getBaseUrl(this) + ":8000/device/"+ user_id +"/sensor/data");
            // uri = new URI(  "ws://192.168.88.252:8000/device/1/sensor/data");
             System.out.println(uri+"adresss90909090");
         } catch (URISyntaxException e) {

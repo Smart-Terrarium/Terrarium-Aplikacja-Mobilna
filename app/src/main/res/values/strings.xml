@@ -2,6 +2,35 @@
     <string name="app_name">Smart Terrarium</string>
     <string name="select_language">Select Language:</string>
     <string name="apply">Apply</string>
+    <string name="New_password">New password</string>
+    <string name="Confrim_password">Confrim password</string>
+    <string name="Change_password">Change password</string>
+    <string name="Device_name">Device name</string>
+    <string name="MAC_address">MAC address</string>
+    <string name="FTP_Address">FTP Address</string>
+    <string name="SSID">SSID</string>
+    <string name="SSID_password">SSID password</string>
+    <string name="Instruction">Instruction</string>
+    <string name="Upload_configuration">Upload configuration</string>
+    <string name="Download_MAC_address">Download MAC address</string>
+    <string name="Add_new_device">Add new device</string>
+    <string name="Email">Email</string>
+    <string name="Password">Password</string>
+    <string name="Login">Login</string>
+    <string name="Register">Register</string>
+    <string name="forget_password">Forget password</string>
+    <string name="Settings">Settings</string>
+    <string name="NOTIFICATIONS">NOTIFICATIONS</string>
+    <string name="Only_Served">Only Served</string>
+    <string name="Back_to_User_panel">Back to User panel</string>
+    <string name="Enter_your_email_to_reset_password">Enter your email to reset password</string>
+    <string name="Reset_Password">Reset Password</string>
+    <string name="Change_language">Change language</string>
+    <string name="Enter_address">Enter address (example: 192.168.1.10)</string>
+    <string name="Save">Save</string>
+    <string name="Condition_Monitor">Condition Monitor</string>
+    <string name="Add_device">Add device</string>
+    <string name="Log_out">Log out</string>
 
 
 

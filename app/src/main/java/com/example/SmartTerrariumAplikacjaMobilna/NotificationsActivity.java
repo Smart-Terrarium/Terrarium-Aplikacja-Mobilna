@@ -64,8 +64,6 @@ public class NotificationsActivity extends AppCompatActivity {
 
         fetchNotifications();
 
-        // Initialize Firebase
-
 
 
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -93,7 +91,7 @@ public class NotificationsActivity extends AppCompatActivity {
         backToUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Tworzymy nową intencję, aby wrócić do UserActivity
+
                 Intent intent = new Intent(NotificationsActivity.this, UserActivity.class);
                 startActivity(intent);
             }
@@ -261,13 +259,11 @@ public class NotificationsActivity extends AppCompatActivity {
     private void fetchNotifications() {
         String url = "http://" + BASE_URL +
                 "?sort_by_priority=" + sortByPriority;
-
-        // Check conditions for "only_served" and "only_not_served"
         if (onlyServed) {
-            url += "&only_served=true"; // Setting "only_served" to true
+            url += "&only_served=true";
         } else {
-            url += "&only_not_served=true"; // Setting "only_not_served" to true
-            url += "&sort_by_served=false"; // Setting "sort_by_served" to false
+            url += "&only_not_served=true";
+            url += "&sort_by_served=false";
         }
 
         Request request = new Request.Builder()

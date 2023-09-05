@@ -1,7 +1,38 @@
+
 <resources>
+    <!--
     <string name="app_name">Smart Terrarium</string>
-    <string name="select_language">Zaznaczony jezyk:</string>
+    <string name="select_language">Wybierz jezyk:</string>
     <string name="apply">Potwierdz</string>
+    <string name="New_password">Nowe hasło</string>
+    <string name="Confrim_password">Potwierdź hasło</string>
+    <string name="Change_password">Zmień hasło</string>
+    <string name="Device_name">Nazwa urządzenia</string>
+    <string name="MAC_address">Adres MAC</string>
+    <string name="FTP_Address">Adres FTP</string>
+    <string name="SSID">SSID</string>
+    <string name="SSID_password">Hasło do SSID</string>
+    <string name="Instruction">Instrukcja</string>
+    <string name="Upload_configuration">Załaduj konfigurację</string>
+    <string name="Download_MAC_address">Pobierz adres MAC</string>
+    <string name="Add_new_device">Dodaj nowe urządzenie</string>
+    <string name="Email">Email</string>
+    <string name="Password">Hasło</string>
+    <string name="Login">Zaloguj się</string>
+    <string name="Register">Zarejestruj się</string>
+    <string name="forget_password">Zapomniałeś hasła</string>
+    <string name="Settings">Ustawienia</string>
+    <string name="NOTIFICATIONS">POWIADOMIENIA</string>
+    <string name="Only_Served">Tylko obsługiwane</string>
+    <string name="Back_to_User_panel">Powrót do panelu użytkownika</string>
+    <string name="Enter_your_email_to_reset_password">Wprowadź swój adres email, aby zresetować hasło</string>
+    <string name="Reset_Password">Zresetuj hasło</string>
+    <string name="Change_language">Zmień język</string>
+    <string name="Enter_address">Wprowadź adres (przykład: 192.168.1.10)</string>
+    <string name="Save">Zapisz</string>
+    <string name="Condition_Monitor">Monitor stanu</string>
+    <string name="Add_device">Dodaj urządzenie</string>
+    <string name="Log_out">Wyloguj się</string>
 
 
 
@@ -22,5 +53,5 @@
 
 
 
-
+-->
 </resources>

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private BaseUrl baseUrlManager;
 
     public static class BaseUrl {
-        private String baseUrl = "http://10.0.2.2";
+        private String baseUrl = "http://192.168.156.89";
 
         public String getBaseUrl(Context context) {
             SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefsFile", Context.MODE_PRIVATE);
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         mHttpClient = new OkHttpClient();
 
-        baseUrlManager = new BaseUrl();  // Inicjalizacja baseUrlManager przed użyciem
+        baseUrlManager = new BaseUrl();
 
 
 
@@ -127,16 +127,21 @@ public class MainActivity extends AppCompatActivity {
             }
             new RegisterTask().execute(json);
         });
+        Button forgotPasswordButton = findViewById(R.id.forgotPasswordButton);
+        forgotPasswordButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ResetPasswordActivity.class);
+            startActivity(intent);
+        });
     }
 
 
 
 
-    private class LoginTask extends AsyncTask<JSONObject, Void, Boolean> {
+    private class LoginTask extends AsyncTask<JSONObject, Void, Integer> {
         @Override
-        protected Boolean doInBackground(JSONObject... params) {
+        protected Integer doInBackground(JSONObject... params) {
             if (params[0] == null) {
-                return false;
+                return -1;
             }
             JSONObject json = params[0];
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
@@ -154,51 +159,61 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 Response response = mHttpClient.newCall(request).execute();
-                if (response.isSuccessful()) {
-                    if (response.code() == 200) {
-                        String responseBody = response.body().string();
-                        JSONObject responseJson = new JSONObject(responseBody);
-                        mAuthToken = responseJson.getString("access_token");
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
+                String responseBody = response.body().string();
+                JSONObject responseJson = new JSONObject(responseBody);
+                mAuthToken = responseJson.getString("access_token");
+                return response.code();
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                return false;
+                return -2;
             }
         }
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            if (success) {
+        protected void onPostExecute(Integer responseCode) {
+            if (responseCode == 200) {
+
                 Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
 
-                saveAuthToken(mAuthToken);  // Save the token
+                saveAuthToken(mAuthToken);
 
                 SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
 
-                // otwórz nową aktywność po zalogowaniu
+
                 Intent intent = new Intent(MainActivity.this, UserActivity.class);
                 intent.putExtra("auth_token", mAuthToken);
                 startActivity(intent);
+            } else if (responseCode == 401) {
+                Toast.makeText(MainActivity.this, "Incorrect username or password", Toast.LENGTH_SHORT).show();
+            } else if (responseCode == 404) {
+                Toast.makeText(MainActivity.this, "User not found", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-        private class RegisterTask extends AsyncTask<JSONObject, Void, Boolean> {
+
+    private class RegisterTask extends AsyncTask<JSONObject, Void, Boolean> {
+        private String errorMessage;
+
         @Override
         protected Boolean doInBackground(JSONObject... params) {
             if (params[0] == null) {
                 return false;
             }
             JSONObject json = params[0];
+
+
+            String password = json.optString("password");
+            if (!isValidPassword(password)) {
+                errorMessage = "Hasło musi mieć co najmniej 8 znaków.";
+                return false;
+            }
+
             RequestBody formBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString());
 
             String baseUrl = baseUrlManager.getBaseUrl(MainActivity.this);
@@ -216,20 +231,32 @@ public class MainActivity extends AppCompatActivity {
                 Response response = mHttpClient.newCall(request).execute();
                 if (response.isSuccessful()) {
                     if (response.code() == 201) {
-                        // Registration successful
                     }
                     return true;
                 } else {
+                    if (response.code() == 409) {
+                        errorMessage = "This email is already in use.";
+                    }
+
                     return false;
                 }
+
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
         }
 
+        private boolean isValidPassword(String password) {
+            int requiredLength = 8;
+            return password.length() >= requiredLength;
+        }
+
         @Override
         protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
             if (success) {
                 Toast.makeText(MainActivity.this, "Registered! Please log in.", Toast.LENGTH_SHORT).show();
                 mTokenTextView.setText(mAuthToken);
@@ -238,8 +265,15 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("email", mEmailEditText.getText().toString());
                 editor.apply();
             } else {
-                Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                if (errorMessage != null) {
+
+                    Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                } else {
+
+                    Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
+                }
             }
         }
+
     }
 }

@@ -59,7 +59,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_file_transfer);
 
         hostnameEditText = findViewById(R.id.hostnameEditText);
-        //usernameEditText = findViewById(R.id.usernameEditText); // Add reference to the username EditText
+        //usernameEditText = findViewById(R.id.usernameEditText);
         // passwordEditText = findViewById(R.id.passwordEditText);
 
         uploadButton = findViewById(R.id.uploadButton);
@@ -99,13 +99,15 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
     }
     private void showDetailsDialog() {
         StringBuilder details = new StringBuilder();
-        // Append your details here
+
         details.append("").append("\n")
                 .append("1. Enter the device name. (The mac address fills in automatically after download)").append("\n")
                 .append("2. Enter the address of the FTP server from the microcontroller").append("\n")
-                .append("3. enter the network name and password").append("\n")
-                .append("4. Click the 'UPLOAD CONFIGURATION' and 'DOWNLOAD MAC ADDRESS' buttons").append("\n")
-                .append("5. Click the 'ADD NEW DEVICE' ").append("\n");
+                .append("3. Enter the network name and password").append("\n")
+                .append("4. Change network from the microcontroller").append("\n")
+                .append("5. Click the 'UPLOAD CONFIGURATION' and 'DOWNLOAD MAC ADDRESS' buttons").append("\n")
+                .append("6. Change network to your default").append("\n")
+                .append("7. Click the 'ADD NEW DEVICE' ").append("\n");
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -223,7 +225,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
                     System.out.println(file);
                     ftp.logout();
                     ftp.disconnect();
-                    return true; // Zwraca true w przypadku pomyślnego przesyłania pliku
+                    return true;
 
                 } catch (SocketException e) {
                     e.printStackTrace();
@@ -234,7 +236,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return false; // Zwraca false w przypadku błędu
+            return false;
 
         }
 

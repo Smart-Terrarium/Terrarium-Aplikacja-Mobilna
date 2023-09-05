@@ -6,17 +6,11 @@
     android:layout_height="match_parent"
 
     tools:context=".UrlActivity">
-    <ImageView
-        android:id="@+id/backgroundImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/background" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.4"
-        android:background="#88000000" />
+        android:background="@color/background" />
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -40,7 +34,7 @@
             android:layout_marginTop="66dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:hint="Enter address (example: 192.168.1.10)"
+            android:hint="@string/Enter_address"
             android:textColorHint="#EBFFFFFF"/>
         <Button
             android:id="@+id/saveUrlButton"
@@ -49,18 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/baseUrlEditText"
             android:layout_centerHorizontal="true"
-            android:text="Save"
+            android:text="@string/Save"
             />
-
-        <Switch
-            android:id="@+id/darkModeSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="200dp"
-            android:text="Dark Mode"
-            tools:ignore="NotSibling,UseSwitchCompatOrMaterialXml" />
-
-
     </RelativeLayout>
 </RelativeLayout>

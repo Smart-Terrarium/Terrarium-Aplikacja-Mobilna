@@ -25,8 +25,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         ChangePasswordButton = findViewById(R.id.button_change_password);
         ChangePasswordButton.setOnClickListener(this);
-        ChangeLanguageButton = findViewById(R.id.button_change_language);
-        ChangeLanguageButton.setOnClickListener(this);
+
         token = getIntent().getStringExtra("auth_token");
     }
 
@@ -38,11 +37,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                 changePasswordIntent.putExtra("auth_token", token);
                 startActivity(changePasswordIntent);
                 break;
-            case R.id.button_change_language:
-                Intent changeLanguageIntent = new Intent(this, ChangeLanguageActivity.class);
-                changeLanguageIntent.putExtra("auth_token", token);
-                startActivity(changeLanguageIntent);
-                break;
+
         }
-    }
-}
+    }}

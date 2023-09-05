@@ -14,8 +14,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.4"
-            android:background="#88000000" />
+            android:background="@color/background" />
 
         <Button
             android:id="@+id/resetListButton"
@@ -24,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:backgroundTint="#E6FFFFFF"
-            android:text="NOTIFICATIONS" />
+            android:text="@string/NOTIFICATIONS" />
 
         <Button
             android:id="@+id/onlyServedToggle"
@@ -34,14 +33,10 @@
             android:layout_gravity="center"
             android:layout_marginLeft="200dp"
             android:backgroundTint="#E6FFFFFF"
-            android:text="Only Served"
+            android:text="@string/Only_Served"
             app:layout_constraintTop_toBottomOf="@id/resetListButton" />
 
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#77000000" />
 
 
 
@@ -51,7 +46,6 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/backgroundImageView"
         android:layout_marginTop="66dp"
         tools:ignore="NotSibling"
         app:layout_constraintTop_toBottomOf="@id/onlyServedToggle">
@@ -76,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="66dp"
-                android:text="Back to User panel"
+                android:text="@string/Back_to_User_panel"
                 app:layout_constraintTop_toBottomOf="@id/notificationListView" />
         </LinearLayout>
     </ScrollView>

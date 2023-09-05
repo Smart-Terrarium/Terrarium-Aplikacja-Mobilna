@@ -25,7 +25,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         mHttpClient = new OkHttpClient();
-        baseUrlManager = new MainActivity.BaseUrl(); // Initialize baseUrlManager
+        baseUrlManager = new MainActivity.BaseUrl();
         mAuthToken = getSharedPreferences("MyPrefs", MODE_PRIVATE).getString("auth_token", null);
 
 
@@ -61,7 +61,7 @@ public class SplashActivity extends AppCompatActivity {
             baseUrl = "http://" + baseUrl;
         }
 
-        // Ensure baseUrl doesn't end with a trailing slash
+
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -75,21 +75,21 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                // Błąd w komunikacji z serwerem - pozostaw użytkownika na stronie logowania
+
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
                     System.out.println("HALOHALOHALO11111");
-                    // Odpowiedź poprawna - automatyczne logowanie
+
                     runOnUiThread(() -> redirectToUserActivity());
                 } else if (response.code() == 401 || response.code() == 403) {
                     System.out.println("HALOHALOHALO2222222");
                     runOnUiThread(() -> redirectToMainActivity());
                 } else {
                     System.out.println("HALOHALOHALO333333");
-                    // Inny błąd - pozostaw użytkownika na stronie logowania
+
                 }
             }
         });

@@ -89,10 +89,10 @@ public class UserActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button_logout:
                 clearAuthToken();
 
-                // Start the MainActivity or any appropriate activity
+
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
-                finish(); // Close the current activity
+                finish();
                 break;
         }
     }
