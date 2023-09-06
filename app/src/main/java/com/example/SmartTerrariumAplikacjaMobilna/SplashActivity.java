@@ -75,6 +75,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
+                runOnUiThread(() -> redirectToMainActivity());
 
             }
 
