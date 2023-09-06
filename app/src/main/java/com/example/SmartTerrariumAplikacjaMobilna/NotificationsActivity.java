@@ -42,7 +42,7 @@ public class NotificationsActivity extends AppCompatActivity {
     private OkHttpClient mHttpClient;
     private MainActivity.BaseUrl baseUrlManager;
     private String BASE_URL;
-
+    private Button refreshButton;
     private boolean sortByPriority = true;
     private boolean onlyServed = false;
 
@@ -61,10 +61,19 @@ public class NotificationsActivity extends AppCompatActivity {
         notificationAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, notificationList);
         notificationListView = findViewById(R.id.notificationListView);
         notificationListView.setAdapter(notificationAdapter);
+        refreshButton = findViewById(R.id.refreshNotificationsButton);
 
         fetchNotifications();
 
 
+
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                refreshNotifications();
+            }
+        });
 
         notificationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -98,7 +107,9 @@ public class NotificationsActivity extends AppCompatActivity {
         });
 
     }
-
+    private void refreshNotifications() {
+        fetchNotifications();
+    }
     private void resetNotificationList() {
         onlyServed = false;
         applyFilters();

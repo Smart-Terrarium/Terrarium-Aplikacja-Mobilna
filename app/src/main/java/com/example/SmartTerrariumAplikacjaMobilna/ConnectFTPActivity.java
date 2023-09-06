@@ -57,7 +57,7 @@ public class ConnectFTPActivity extends AppCompatActivity implements View.OnClic
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_transfer);
-
+   
         hostnameEditText = findViewById(R.id.hostnameEditText);
         //usernameEditText = findViewById(R.id.usernameEditText);
         // passwordEditText = findViewById(R.id.passwordEditText);

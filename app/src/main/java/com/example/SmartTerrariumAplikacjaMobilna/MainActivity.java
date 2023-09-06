@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         baseUrlManager = new BaseUrl();
 
-
+        System.out.println("TEST URUCHOMIENIA MAIN");
 
 
         mAuthToken = getIntent().getStringExtra("auth_token");

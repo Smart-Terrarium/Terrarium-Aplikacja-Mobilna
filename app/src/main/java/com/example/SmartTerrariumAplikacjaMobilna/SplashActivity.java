@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.os.Handler;
+import android.widget.Toast; // Importuj Toast
 
 import java.io.IOException;
 
@@ -28,25 +29,22 @@ public class SplashActivity extends AppCompatActivity {
         baseUrlManager = new MainActivity.BaseUrl();
         mAuthToken = getSharedPreferences("MyPrefs", MODE_PRIVATE).getString("auth_token", null);
 
-
-
         // Tworzy obiekt Handler, który opóźnia uruchomienie nowej aktywności
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 checkAuthTokenValidity();
-
-                // Zamknij obecną aktywność
-                finish();
             }
         }, 1200);
     }
+
     private void redirectToUserActivity() {
         Intent intent = new Intent(SplashActivity.this, UserActivity.class);
         intent.putExtra("auth_token", mAuthToken);
         startActivity(intent);
         finish();
     }
+
     private void redirectToMainActivity() {
         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
         intent.putExtra("auth_token", mAuthToken);
@@ -61,7 +59,6 @@ public class SplashActivity extends AppCompatActivity {
             baseUrl = "http://" + baseUrl;
         }
 
-
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
@@ -75,22 +72,26 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                runOnUiThread(() -> redirectToMainActivity());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        runOnUiThread(() -> redirectToMainActivity());
+                        System.out.println("HALOHALOHALO11111");
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.code() == 200) {
                     System.out.println("HALOHALOHALO11111");
-
                     runOnUiThread(() -> redirectToUserActivity());
                 } else if (response.code() == 401 || response.code() == 403) {
                     System.out.println("HALOHALOHALO2222222");
                     runOnUiThread(() -> redirectToMainActivity());
                 } else {
                     System.out.println("HALOHALOHALO333333");
-
                 }
             }
         });

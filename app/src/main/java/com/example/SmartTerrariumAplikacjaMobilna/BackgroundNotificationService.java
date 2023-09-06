@@ -39,10 +39,9 @@ public class BackgroundNotificationService extends Service {
         baseUrlManager = new MainActivity.BaseUrl();
 
         createNotificationChannel();
-        Notification notification = buildNotification("Foreground Service", "Service notifications are running");
+        Notification notification = buildForegroundServiceNotification("Foreground Service", "Service notifications are running");
         startForeground(NOTIFICATION_ID, notification);
 
-        // Register the CloseNotificationReceiver to listen for CLOSE_NOTIFICATION broadcasts
         closeNotificationReceiver = new CloseNotificationReceiver();
         IntentFilter closeNotificationFilter = new IntentFilter(CLOSE_NOTIFICATION_ACTION);
         registerReceiver(closeNotificationReceiver, closeNotificationFilter);
@@ -56,7 +55,6 @@ public class BackgroundNotificationService extends Service {
 
         return START_STICKY;
     }
-
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -74,10 +72,8 @@ public class BackgroundNotificationService extends Service {
         }
     }
 
-    private Notification buildNotification(String title, String message) {
+    private Notification buildForegroundServiceNotification(String title, String message) {
         Context context = getApplicationContext();
-
-        // Intent for the notification's main action (e.g., opening an activity)
         Intent notificationIntent = new Intent(context, NotificationsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
@@ -86,7 +82,29 @@ public class BackgroundNotificationService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Intent for the custom action (e.g., clearing notifications)
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(false)
+                .setContentIntent(pendingIntent)
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+
+
+        return builder.build();
+    }
+
+
+    private Notification buildNotification(String title, String message) {
+        Context context = getApplicationContext();
+        Intent notificationIntent = new Intent(context, NotificationsActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
         Intent closeNotificationIntent = new Intent(BackgroundNotificationService.CLOSE_NOTIFICATION_ACTION);
         PendingIntent closePendingIntent = PendingIntent.getBroadcast(
                 context,
@@ -94,7 +112,6 @@ public class BackgroundNotificationService extends Service {
                 closeNotificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle(title)
@@ -103,11 +120,10 @@ public class BackgroundNotificationService extends Service {
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                .addAction(R.drawable.logo, "Clear", closePendingIntent); // Add a custom action button
+                .addAction(R.drawable.logo, "Clear", closePendingIntent);
 
         return builder.build();
     }
-
 
     private void startSSEConnection() {
         try {
@@ -150,7 +166,6 @@ public class BackgroundNotificationService extends Service {
                         JSONObject alert = payload.optJSONObject("alert");
                         if (alert != null) {
                             String macAddress = alert.optString("mac_address");
-                            int alertNumber = alert.optInt("alert_number");
                             String description = alert.optString("description");
                             int priority = alert.optInt("priority");
 
@@ -306,11 +321,11 @@ public class BackgroundNotificationService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        // Unregister the CloseNotificationReceiver
         if (closeNotificationReceiver != null) {
             unregisterReceiver(closeNotificationReceiver);
         }
     }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;

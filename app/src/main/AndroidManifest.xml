@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+
     <meta-data
         android:name="com.google.firebase.messaging.default_notification_channel_id"
         android:value="channel_id" />
@@ -42,6 +43,21 @@
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true">
 
+        <receiver android:name=".BackgroundNotificationService$CloseNotificationReceiver"
+            android:exported="false"
+            tools:ignore="Instantiatable,WrongManifestParent">
+            <intent-filter>
+                <action android:name="com.example.SmartTerrariumAplikacjaMobilna.CLOSE_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".BackgroundNotificationService$SwipeToClearReceiver"
+            android:exported="false"
+            tools:ignore="Instantiatable,WrongManifestParent">
+            <intent-filter>
+                <action android:name="com.example.SmartTerrariumAplikacjaMobilna.SWIPE_TO_CLEAR_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.SplashActivity"
             android:exported="true">
