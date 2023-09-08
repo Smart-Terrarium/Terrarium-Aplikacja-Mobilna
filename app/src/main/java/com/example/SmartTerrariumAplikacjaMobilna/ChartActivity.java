@@ -136,8 +136,8 @@ public class ChartActivity extends AppCompatActivity {
                         JSONArray responseJson = null;
                         try {
                             responseJson = new JSONArray(responseBody);
-                            deviceNames.clear();  // Wyczyść listę przed dodaniem nowych elementów
-                            deviceIds.clear();    // Wyczyść listę przed dodaniem nowych elementów
+                            deviceNames.clear();
+                            deviceIds.clear();
                             for (int i = 0; i < responseJson.length(); i++) {
                                 JSONObject deviceJson = responseJson.getJSONObject(i);
                                 int deviceId = deviceJson.getInt("id");
@@ -153,9 +153,9 @@ public class ChartActivity extends AppCompatActivity {
                                     deviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     deviceSpinner.setAdapter(deviceAdapter);
 
-                                    // Tutaj możesz ustawić user_id na podstawie wybranej pozycji w Spinnerze
+
                                     if (!deviceIds.isEmpty()) {
-                                        user_id = deviceIds.get(0); // Domyślnie wybieramy pierwszy element
+                                        user_id = deviceIds.get(0);
                                     }
 
                                     if (deviceNames.contains(selectedDeviceId)) {
@@ -286,7 +286,7 @@ public class ChartActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
                 if (position >= 0 && position < deviceIds.size()) {
                     selectedDevice = deviceIds.get(position);
-                    user_id = selectedDevice; // Ustaw user_id na podstawie wybranej pozycji
+                    user_id = selectedDevice;
                     createWebSocketClient();
                     getListSensorIds(mAuthToken, selectedDevice);
                 }
