@@ -51,13 +51,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".BackgroundNotificationService$SwipeToClearReceiver"
-            android:exported="false"
-            tools:ignore="Instantiatable,WrongManifestParent">
-            <intent-filter>
-                <action android:name="com.example.SmartTerrariumAplikacjaMobilna.SWIPE_TO_CLEAR_NOTIFICATION" />
-            </intent-filter>
-        </receiver>
+
 
         <activity android:name="com.example.SmartTerrariumAplikacjaMobilna.SplashActivity"
             android:exported="true">

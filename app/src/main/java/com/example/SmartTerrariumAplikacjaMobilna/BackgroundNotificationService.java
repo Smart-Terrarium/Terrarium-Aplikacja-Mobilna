@@ -2,6 +2,7 @@ package com.example.SmartTerrariumAplikacjaMobilna;
 
 import android.app.*;
 import android.content.*;
+import android.net.Uri;
 import android.os.*;
 import android.provider.*;
 import android.util.*;
@@ -10,6 +11,8 @@ import org.json.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 
 public class BackgroundNotificationService extends Service {
 
@@ -82,19 +85,20 @@ public class BackgroundNotificationService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
+
+        Uri defaultNotificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(false)
                 .setContentIntent(pendingIntent)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
-
+                .setSound(defaultNotificationSound);
 
         return builder.build();
     }
-
 
     private Notification buildNotification(String title, String message) {
         Context context = getApplicationContext();
@@ -112,6 +116,10 @@ public class BackgroundNotificationService extends Service {
                 closeNotificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+
+
+        Uri defaultNotificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_id")
                 .setSmallIcon(R.drawable.logo)
                 .setContentTitle(title)
@@ -119,11 +127,12 @@ public class BackgroundNotificationService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setSound(defaultNotificationSound)
                 .addAction(R.drawable.logo, "Clear", closePendingIntent);
 
         return builder.build();
     }
+
 
     private void startSSEConnection() {
         try {
